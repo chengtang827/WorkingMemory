@@ -64,6 +64,7 @@ if(dnum>0)
         data.session(i).spikeCount = spikeCount;
         data.session(i).stimLoc = stimLoc;
         data.session(i).theStim = theStim;
+        fprintf('session: %d\n',i);
     end
     
     % this is a valid object

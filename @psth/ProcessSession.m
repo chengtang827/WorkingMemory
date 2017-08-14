@@ -10,16 +10,21 @@ load('neuron_names.mat');
 
 saveFlag = 0;
 redoFlag = 0;
+binLen = 100; %default is 100ms time bin
+stimulus = 'target'; %default is 'target', can be 'distractor'
 
 for i = 1:length(varargin{1})
     arg = varargin{1}{i};
     if ischar(arg)
-        arg = lower(arg);
         switch arg
             case('save')
                 saveFlag = 1;
             case('redo')
                 redoFlag = 1;
+            case('binLen')
+                binLen = varargin{1}{i+1};
+            case('stimulus')
+                stimulus = varargin{1}{i+1};
         end
     end
 end
@@ -42,16 +47,15 @@ neuronnr = length(neurons);
 trialnr = length(trials);
 
 %extract the stimulus info
-%default is target
 stimLoc = zeros(trialnr,2);
 stimTs = zeros(trialnr,1);
 
 for i = 1:trialnr
-    stim = load([pwd '\trial' sprintf('%02d', i) '\target.mat']);
+    stim = load([pwd '\trial' sprintf('%02d', i) '\' stimulus '.mat']);
     try
-        stimLoc(i,1) = stim.target.row;
-        stimLoc(i,2) = stim.target.column;
-        stimTs(i) = stim.target.timestamp;
+        stimLoc(i,1) = stim.(stimulus).row;
+        stimLoc(i,2) = stim.(stimulus).column;
+        stimTs(i) = stim.(stimulus).timestamp;
     catch
         stimLoc(i,1) = NaN;
         stimLoc(i,2) = NaN;
@@ -69,7 +73,7 @@ alignment = maxStimTs - stimTs;
 
 spikes = cell(neuronnr,trialnr);
 %iterate over the trials
-minTs = maxStimTs;%just an initialization
+minTs = 10e7;%just an initialization
 maxTs = 0;
 for k = 1:trialnr
     %iterate over the neurons
@@ -86,8 +90,6 @@ end
 
 
 %compute average over trials
-%default is 100ms time bin
-binLen = 100;
 binnr = ceil((maxTs-minTs)/binLen);
 spikeCount = zeros(neuronnr, trialnr, binnr);
 theStim = maxStimTs/binLen;
@@ -107,7 +109,7 @@ for i = 1:neuronnr
             if isempty(spike)||isnan(spike(1))||range(2)<spike(1)||range(1)>spike(end)
                 spikeCount(i,j,k) = -1;
             else
-                spikeCount(i,j,k) = sum(spike>=range(1)&spike<=range(2));  
+                spikeCount(i,j,k) = sum(spike>=range(1)&spike<=range(2));
             end
         end
     end

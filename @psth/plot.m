@@ -34,11 +34,22 @@ theStim = obj.data.session(n).theStim;
 neuronIndex = Args.NeuronIndex;
 
 for i = 1:length(locations)
-    location = locations{i};    
+    location = locations{i};
     temp = stimLoc==location;
     index = temp(:,1)&temp(:,2);
+    
     selected = spikeCount(:,index,:);
-    psth = squeeze(mean(selected,2));
+    validBin = selected~=-1;
+    neuronnr = size(spikeCount,1);
+    binnr = size(spikeCount,3);
+    psth = NaN(neuronnr, binnr);
+    
+    for k = 1:neuronnr
+        for j = 1:binnr
+            psth(k,j) = mean(selected(k,validBin(k,:,j),j));
+        end
+    end
+    
     subplot(3,3,i);
     plot(psth(neuronIndex,:));
     line([theStim theStim], [0 max(psth(neuronIndex,:))])

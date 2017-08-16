@@ -10,6 +10,8 @@ function [obj, varargout] = psth(varargin)
 %   %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %example [as, Args] = psth('save','redo')
+%   This object is calculated on a single session, cd to ../run01/ as
+%   an example
 %
 %dependencies:
 
@@ -51,44 +53,90 @@ end
 
 function obj = createObject(Args,varargin)
 
-% example object
-dlist = nptDir('session*');
-% get entries in directory
-dnum = size(dlist,1);
+dlist = nptDir('trial*');
+trialnr = length(dlist);
+if trialnr<1
+    obj = createEmptyObject(Args);
+    return;
+end
 
-% check if the right conditions were met to create object
-ps = psth;
-if(dnum>0)
-    for i = 1:length(dlist)
-        [spikeCount, stimLoc, theStim]= ProcessSession(ps,dlist(i).name,varargin);
-        data.session(i).spikeCount = spikeCount;
-        data.session(i).stimLoc = stimLoc;
-        data.session(i).theStim = theStim;
-        fprintf('session: %d\n',i);
+%%%
+load('neuron_names.mat');
+neuronnr = length(neurons);
+stimulus = 'target';
+binLen = 50;
+pre = -300;
+post = 2600;
+binnr = ceil((post-pre)/binLen);
+%%%
+
+
+stimLoc = zeros(trialnr,2);
+stimTs = zeros(trialnr,1);
+spikeCount = zeros(neuronnr, trialnr, binnr);
+flags = zeros(trialnr,4); %(target, distractor, response_cue, reward)
+%1 for present, 0 for absent
+
+
+
+for i = 1:trialnr
+    load([pwd '\trial' sprintf('%02d', i) '\event.mat']);
+    flags(i,1) = ~isempty(event.target);
+    flags(i,2) = ~isempty(event.distractor);
+    flags(i,3) = ~isempty(event.response_cue);
+    flags(i,4) = ~isempty(event.reward);
+    
+    try
+        stimLoc(i,1) = event.(stimulus).row;
+        stimLoc(i,2) = event.(stimulus).column;
+        stimTs(i) = event.(stimulus).timestamp;
+    catch
+        stimLoc(i) = NaN;
+        stimTs(i) = NaN;
     end
     
-    % this is a valid object
-    % these are fields that are useful for most objects
-    data.numSets = dnum;
-    data.Args = Args;
-    
-    % these are object specific fields
-    data.dlist = dlist;
-    % set index to keep track of which data goes with which directory
-    data.setIndex = dnum;
-    
-    % create nptdata so we can inherit from it
-    
-    data.Args = Args;
-    n = nptdata(data.numSets,0,pwd);
-    d.data = data;
-    obj = class(d,Args.classname,n);
-       
-    saveObject(obj,'ArgsC',Args);
-else
-    % create empty object
-    obj = createEmptyObject(Args);
+    for j = 1:neuronnr
+        load(['trial' sprintf('%02d', i) '\' cell2mat(neurons(j)) '.mat']);
+        spike = spike - stimTs(i);
+        
+        for k = 1:binnr
+            range = [(pre+(k-1)*binLen) (pre+k*binLen)];
+            spikeCount(j,i,k) = sum(spike>=range(1)&spike<=range(2));
+        end
+    end
 end
+%%%
+switch stimulus
+    case 'target'
+        validTrials = ~isnan(stimTs)&flags(:,2);
+    case 'distractor'
+        validTrials = ~isnan(stimTs)&flags(:,3);
+end
+
+
+data.spikeCount = spikeCount(:,validTrials,:);
+data.stimLoc = stimLoc(validTrials,:);
+data.flags = flags(validTrials,:);
+
+% this is a valid object
+% these are fields that are useful for most objects
+data.numSets = neuronnr;
+data.Args = Args;
+
+% these are object specific fields
+%data.dlist = dlist;
+% set index to keep track of which data goes with which directory
+%data.setIndex = 1;
+
+% create nptdata so we can inherit from it
+
+data.Args = Args;
+n = nptdata(data.numSets,0,pwd);
+d.data = data;
+obj = class(d,Args.classname,n);
+
+saveObject(obj,'ArgsC',Args);
+
 
 function obj = createEmptyObject(Args)
 

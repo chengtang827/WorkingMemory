@@ -3,9 +3,9 @@ function [obj, varargout] = plot(obj,varargin)
 %   OBJ = plot(OBJ) creates a raster plot of the neuronal
 %   response.
 
-Args = struct('LabelsOff',0,'NeuronIndex',1,'GroupPlots',1,'GroupPlotIndex',1,'Color','b', ...
+Args = struct('LabelsOff',0,'AverageRuns',0,'RunNumber',1,'GroupPlots',1,'GroupPlotIndex',1,'Color','b', ...
     'ReturnVars',{''}, 'ArgsOnly',0);
-Args.flags = {'LabelsOff','ArgsOnly'};
+Args.flags = {'LabelsOff','ArgsOnly','AverageRuns'};
 [Args,varargin2] = getOptArgs(varargin,Args);
 
 % if user select 'ArgsOnly', return only Args structure for an empty object
@@ -25,34 +25,45 @@ end
 
 % add code for plot options here
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-locations = {[2 2];[2 3];[2 4];[3 2];[3,3];[3 4]; [4 2]; [4 3]; [4 4]};
+binLen = 50;%ms
 
-stimLoc = obj.data.session(n).stimLoc;
-spikeCount = obj.data.session(n).spikeCount;
-theStim = obj.data.session(n).theStim;
 
-neuronIndex = Args.NeuronIndex;
+if Args.AverageRuns
+    %find the average over all the trials
+    stimLoc = [];
+    spikeCount = [];
+    flags = [];
+    for i = 1:length(obj.data)
+        stimLoc = [stimLoc;obj.data(i).stimLoc];
+        spikeCount = [spikeCount obj.data(i).spikeCount];
+        flags = [flags;obj.data(i).flags];
+    end
+else
+    runnr = Args.RunNumber;
+    stimLoc = obj.data(runnr).stimLoc;
+    spikeCount = obj.data(runnr).spikeCount;
+    flags = obj.data(runnr).flags;
+end
+
+
+
+%%%%%%%%%%%%%%%%
+locations = {[2 2];[3 2];[4 2];[2 3];[3 3];[4 3]; [2 4]; [3 4]; [4 4]};
 
 for i = 1:length(locations)
     location = locations{i};
     temp = stimLoc==location;
-    index = temp(:,1)&temp(:,2);
+    selected = temp(:,1)&temp(:,2);
     
-    selected = spikeCount(:,index,:);
-    validBin = selected~=-1;
-    neuronnr = size(spikeCount,1);
-    binnr = size(spikeCount,3);
-    psth = NaN(neuronnr, binnr);
-    
-    for k = 1:neuronnr
-        for j = 1:binnr
-            psth(k,j) = mean(selected(k,validBin(k,:,j),j));
-        end
-    end
+    %%%%%
+    %only the successful trials
+    selected = selected&flags(:,4);
+    %%%%%
+    psth = squeeze(mean(spikeCount(:,selected,:),2));
     
     subplot(3,3,i);
-    plot(psth(neuronIndex,:));
-    line([theStim theStim], [0 max(psth(neuronIndex,:))])
+    plot(-275:50:2575,psth(n,:)/(binLen/1000));
+    xlim([-300 2600]);
 end
 % @dirfiles/PLOT takes 'LabelsOff' as an example
 if(~Args.LabelsOff)
@@ -60,7 +71,7 @@ if(~Args.LabelsOff)
     ylabel('Y Axis')
 end
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 RR = eval('Args.ReturnVars');
 for i=1:length(RR) RR1{i}=eval(RR{i}); end

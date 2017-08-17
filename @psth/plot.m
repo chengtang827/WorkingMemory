@@ -3,7 +3,7 @@ function [obj, varargout] = plot(obj,varargin)
 %   OBJ = plot(OBJ) creates a raster plot of the neuronal
 %   response.
 
-Args = struct('LabelsOff',0,'AverageRuns',0,'RunNumber',1,'GroupPlots',1,'GroupPlotIndex',1,'Color','b', ...
+Args = struct('LabelsOff',0,'AverageRuns',0,'SessionNumber',1,'GroupPlots',1,'GroupPlotIndex',1,'Color','b', ...
     'ReturnVars',{''}, 'ArgsOnly',0);
 Args.flags = {'LabelsOff','ArgsOnly','AverageRuns'};
 [Args,varargin2] = getOptArgs(varargin,Args);
@@ -26,23 +26,42 @@ end
 % add code for plot options here
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 binLen = 50;%ms
-
+sessionnr = Args.SessionNumber;
 
 if Args.AverageRuns
-    %find the average over all the trials
-    stimLoc = [];
-    spikeCount = [];
-    flags = [];
-    for i = 1:length(obj.data)
-        stimLoc = [stimLoc;obj.data(i).stimLoc];
-        spikeCount = [spikeCount obj.data(i).spikeCount];
-        flags = [flags;obj.data(i).flags];
+    switch obj.data(1).Args.stimulus
+        case 'target'
+            %divide the runs into 2 categories
+            %sessions with distractor and sessions without distractor
+            %1 without distractor, 2 with distractor
+            stimLoc = cell(2,1);
+            spikeCount = cell(2,1);
+            flags = cell(2,1);
+            for i = 1:length(obj.data)
+                if obj.data(i).flags(1,2)==0%without distractor
+                    stimLoc{1} = [stimLoc{1}; obj.data(i).stimLoc];
+                    spikeCount{1} = [spikeCount{1} obj.data(i).spikeCount];
+                    flags{1} = [flags{1}; obj.data(i).flags];
+                else
+                    %with distractor
+                    stimLoc{2} = [stimLoc{2}; obj.data(i).stimLoc];
+                    spikeCount{2} = [spikeCount{2} obj.data(i).spikeCount];
+                    flags{2} = [flags{2}; obj.data(i).flags];
+                end
+            end
+            stimLoc = stimLoc{sessionnr};
+            spikeCount = spikeCount{sessionnr};
+            flags = flags{sessionnr};
+            
+        case 'distractor'
+            %TODO
     end
 else
-    runnr = Args.RunNumber;
-    stimLoc = obj.data(runnr).stimLoc;
-    spikeCount = obj.data(runnr).spikeCount;
-    flags = obj.data(runnr).flags;
+    %display individual sessions
+    
+    stimLoc = obj.data(sessionnr).stimLoc;
+    spikeCount = obj.data(sessionnr).spikeCount;
+    flags = obj.data(sessionnr).flags;
 end
 
 

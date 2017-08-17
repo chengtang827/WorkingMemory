@@ -24,7 +24,12 @@ else
     elseif(isempty(p))
         % p is right object but is empty so return q, which should be
         % right object
-        r = q;
+        if size(q.data(1).spikeCount,2)~=0
+            r = q;
+        else
+            r = p;
+        end
+        
     elseif(isempty(q))
         % p are q are both right objects but q is empty while p is not
         % so return p
@@ -37,8 +42,10 @@ else
 		r = p;
 		% useful fields for most objects
 		
-
-        r.data=[p.data q.data];
+        if size(q.data(1).spikeCount,2)~=0
+            r.data=[p.data q.data];
+        end
+        
 		
 		% object specific fields
 

@@ -15,10 +15,11 @@ function [obj, varargout] = psth(varargin)
 %
 %dependencies:
 
-Args = struct('RedoLevels',0, 'SaveLevels',0, 'Auto',0, 'ArgsOnly',0);
+Args = struct('RedoLevels',0, 'SaveLevels',0, 'Auto',1, 'ArgsOnly',0,'stimulus','target','binLen',50,...
+    'pre',-300,'post',2600);
 Args.flags = {'Auto','ArgsOnly'};
 % The arguments which can be neglected during arguments checking
-Args.UnimportantArgs = {'RedoLevels','SaveLevels'};
+Args.UnimportantArgs = {'RedoLevels','SaveLevels','Auto'};
 
 [Args,modvarargin] = getOptArgs(varargin,Args, ...
     'subtract',{'RedoLevels','SaveLevels'}, ...
@@ -33,7 +34,7 @@ Args.matvarname = 'ps';
 
 % To decide the method to create or load the object
 command = checkObjCreate('ArgsC',Args,'narginC',nargin,'firstVarargin',varargin);
-
+  
 if(strcmp(command,'createEmptyObjArgs'))
     varargout{1} = {'Args',Args};
     obj = createEmptyObject(Args);
@@ -63,10 +64,10 @@ end
 %%%
 load('neuron_names.mat');
 neuronnr = length(neurons);
-stimulus = 'target';
-binLen = 50;
-pre = -300;
-post = 2600;
+stimulus = Args.stimulus;
+binLen = Args.binLen;
+pre = Args.pre;
+post = Args.post;
 binnr = ceil((post-pre)/binLen);
 %%%
 
@@ -108,9 +109,9 @@ end
 %%%
 switch stimulus
     case 'target'
-        validTrials = ~isnan(stimTs)&flags(:,2);
+        validTrials = ~isnan(stimTs)&flags(:,4);
     case 'distractor'
-        validTrials = ~isnan(stimTs)&flags(:,3);
+        validTrials = ~isnan(stimTs)&flags(:,4);
 end
 
 
@@ -122,11 +123,6 @@ data.flags = flags(validTrials,:);
 % these are fields that are useful for most objects
 data.numSets = neuronnr;
 data.Args = Args;
-
-% these are object specific fields
-%data.dlist = dlist;
-% set index to keep track of which data goes with which directory
-%data.setIndex = 1;
 
 % create nptdata so we can inherit from it
 

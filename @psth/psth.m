@@ -15,6 +15,11 @@ function [obj, varargout] = psth(varargin)
 %
 %dependencies:
 
+%ProcessLevel example:
+%In D:\E\Matlab 2017a\bin\working memory\080817
+%r = ProcessLevel(psth,'Levels','Day','LevelObject','Session','save')
+%InspectGUI(r)
+
 Args = struct('RedoLevels',0, 'SaveLevels',0, 'Auto',1, 'ArgsOnly',0,'stimulus','target','binLen',50,...
     'pre',-300,'post',2600);
 Args.flags = {'Auto','ArgsOnly'};

@@ -33,10 +33,15 @@ clusterids = unique(obj.data.cid);
 cm = colormap;
 cc = cm(clusterids, :);
 ax2 = subplot(2,2,2);
+ax3 = subplot(2,2,[3,4]);
+plot(ax3, obj.data.y);
 for ci = 1:length(clusterids)
 	idx = find(obj.data.cid == clusterids(ci));
 	plot(ax2, obj.data.waveforms(:,idx),'color', cc(ci,:));
+	x = obj.data.spikeidx(idx);
+	scatter(ax3, x, obj.data.y(x), 'color', cc(ci,:));
 end
+hold on;
 
 if(~Args.LabelsOff)
 	ax1 = subplot(2,2,1);

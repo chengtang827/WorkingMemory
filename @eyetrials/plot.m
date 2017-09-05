@@ -37,8 +37,8 @@ hold off
 
 % @eyetrials/PLOT takes 'LabelsOff' as an example
 if(~Args.LabelsOff)
-	xlabel('X Axis')
-	ylabel('Y Axis')
+	xlabel('Time [s]')
+	ylabel('Trial')
 end
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

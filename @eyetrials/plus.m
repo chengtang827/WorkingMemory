@@ -30,14 +30,14 @@ else
         % so return p
         r = p;
 	else
-		% both p and q are the right kind of objects so add them 
+		% both p and q are the right kind of objects so add them
 		% together
 		% assign p to r so that we can be sure we are returning the right
 		% object
 		r = p;
 		% useful fields for most objects
 		r.data.numSets = p.data.numSets + q.data.numSets;
-
+		r.data.setIndex = [p.data.setIndex; q.data.setIndex + p.data.setIndex(end)];
 
 		% object specific fields
 		r.data.dlist = [p.data.dlist; q.data.dlist];

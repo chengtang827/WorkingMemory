@@ -68,7 +68,6 @@ if(dnum>0)
     data.numSets = 1;
     % these are object specific fields
     data.dlist = dlist;
-    % set index to keep track of which data goes with which directory
     [pathstr,name,ext] = fileparts(dlist(1).name);
     if strcmp(ext,".mat")
       load(dlist(1).name);
@@ -78,8 +77,11 @@ if(dnum>0)
     end
     trialdata = parseEDFData(eyetrials, edfdata);
     data.trials = trialdata.trials;
+    ntrials = length(data.trials);
     % create nptdata so we can inherit from it
     data.Args = Args;
+    % set index to keep track of which data goes with which directory
+    data.setIndex = ones(ntrials,1);
     n = nptdata(data.numSets,0,pwd);
     d.data = data;
     obj = class(d,Args.classname,n);

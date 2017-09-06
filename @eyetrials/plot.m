@@ -26,41 +26,36 @@ end
 
 % add code for plot options here
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-trial_start_color = [0.203922, 0.541176, 0.741176];
-trial_end_color = [0.737255, 0.827451, 0.0];
-response_cue_color = [0.32549, 0.0, 0.0];
-fixation_color = [0.0, 0.282353, 0.0];
-marker_size = 10.0;
+
 ntrials = length(tidx);
-trial_start = nan(ntrials,1);
-fixation_start = nan(ntrials, 1);
-response_cue = nan(ntrials,1);
-trial_end = nan(ntrials,1);
+ff = fieldnames(obj.data.trials);
+%create perceptually distinguisable colors for plotting
+plot_colors = distinguishable_colors(length(ff));
+ydata = nan(ntrials,length(ff));
 
 for t = 1:ntrials
-	trial_start(t) =  double(obj.data.trials(tidx(t)).start)/1000.0;
-	if ~isempty(obj.data.trials(tidx(t)).fixation_start)
-		fixation_start(t) = double(obj.data.trials(tidx(t)).fixation_start)/1000.0;
-	end
-	if ~isempty(obj.data.trials(tidx(t)).response_cue)
-		response_cue(t) = double(obj.data.trials(tidx(t)).response_cue)/1000.0;
-	end
-	if ~isempty(obj.data.trials(tidx(t)).end)
-		trial_end(t) = double(obj.data.trials(tidx(t)).end)/1000.0;
+	t0 = obj.data.trials(tidx(t)).start;
+	ydata(t,1) = double(t0)/1000.0;
+	for fi=1:length(ff)
+		if ~isempty(obj.data.trials(tidx(t)).(ff{fi}))
+			xx = obj.data.trials(tidx(t)).(ff{fi});
+			if isstruct(xx)
+				ydata(t,fi) = double(xx.timestamp-t0)/1000.0;
+			else
+				ydata(t,fi) = double(xx-t0)/1000.0;
+			end
+		end
 	end
 end
+marker_size = 10.0;
 y = 1:ntrials;
-l1 = plot(zeros(ntrials,1), y,'.','color',trial_start_color,...
-				'markersize', marker_size);
+cla
 hold on
-l2 = plot(fixation_start - trial_start, y, '.', 'color', fixation_color,...
+for fi=1:length(ff)
+	plot(ydata(:,fi), y, '.', 'color', plot_colors(fi,:),...
 				'markersize', marker_size);
-l3 = plot(response_cue - trial_start, y, '.', 'color', response_cue_color,...
-				'markersize', marker_size);
-l4 = plot(trial_end-trial_start, y, '.', 'color', trial_end_color,...
-				'markersize', marker_size);
-legend([l1,l2,l3,l4], 'Trial start', 'Fixation start', 'Response cue', 'Trial end');
+end
+legend(ff)
 hold off
 
 % @eyetrials/PLOT takes 'LabelsOff' as an example

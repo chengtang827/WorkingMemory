@@ -74,6 +74,7 @@ if(dnum>0)
       load(dlist(1).name);
     else
       edfdata = edfmex(dlist(1).name);
+      save('edfdata.mat','edfdata');
     end
     trialdata = parseEDFData(edfdata);
     data.trials = trialdata.trials;

@@ -96,7 +96,7 @@ data.numSets = 0;
 data.setNames = '';
 
 % these are object specific fields
-data.trials = struct
+data.trials = struct;
 
 % create nptdata so we can inherit from it
 data.Args = Args;

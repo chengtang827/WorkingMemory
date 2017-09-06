@@ -30,6 +30,8 @@ function sessions  = parseEDFData(obj,edfdata,nrows,ncols)
         ncols = 5;
         nrows = 5;
     end
+    required_fields = {'start', 'end', 'fixation_start', 'resoonse_cue',...
+                       'failure','delay', 'reward', 'target','distractor'};
     nevents = length(edfdata.FEVENT);
     trialnr = 0;
     sessions = struct;
@@ -82,6 +84,17 @@ function sessions  = parseEDFData(obj,edfdata,nrows,ncols)
                 sessions(sessionnr).trials(trialnr).fixation_start = edfdata.FEVENT(nextevent).sttime;
             elseif strcmpi(m,'00100000') %trial end
                 sessions(sessionnr).trials(trialnr).end = edfdata.FEVENT(nextevent).sttime;
+                %make sure we have all required fields, if not fill them with nan
+                for fi = 1:length(required_fields)
+                  if ~isfield(sessions(sessionnr).trials(trialnr),required_fields{fi})
+                    if (strcmpi(required_fields{fi},'distractor') ||...
+                        strcmpi(required_fields{fi},'target'))
+                      sessions(sessionnr).trials(trialnr).(required_fields{fi}) = struct('row', 0, 'column',0, 'timestamp', nan);
+                    else
+                      sessions(sessionnr).trials(trialnr).(required_fields{fi}) = nan;
+                    end
+                  end
+                end
             elseif strcmpi(m, '00001111') %stimulation
                 sessions(sessionnr).trials(trialnr).stim = edfdata.FEVENT(nextevent).sttime;
 

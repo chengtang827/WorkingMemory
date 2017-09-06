@@ -82,7 +82,7 @@ if(dnum>0)
     n = nptdata(data.numSets,0,pwd);
     d.data = data;
     obj = class(d,Args.classname,n);
-    saveObject(obj,Args);
+    saveObject(obj,'ArgsC', Args);
 else
     % create empty object
     obj = createEmptyObject(Args);

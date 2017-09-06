@@ -76,7 +76,7 @@ if(dnum>0)
       edfdata = edfmex(dlist(1).name);
       save('edfdata.mat','edfdata');
     end
-    trialdata = parseEDFData(edfdata);
+    trialdata = parseEDFData(eyetrials, edfdata);
     data.trials = trialdata.trials;
     % create nptdata so we can inherit from it
     data.Args = Args;

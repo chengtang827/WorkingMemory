@@ -107,6 +107,12 @@ function sessions  = parseEDFData(obj,edfdata,nrows,ncols)
                 sessions(sessionnr).trials(trialnr).gazex = double(edfdata.FSAMPLE.gx(tracked_eye,tidx));
                 sessions(sessionnr).trials(trialnr).gazey = double(edfdata.FSAMPLE.gy(tracked_eye,tidx));
                 sessions(sessionnr).trials(trialnr).pupil = double(edfdata.FSAMPLE.pa(tracked_eye,tidx));
+                %filter out saturated points
+                sidx = sessions(sessionnr).trials(trialnr).gazex == 100000000;
+                sessions(sessionnr).trials(trialnr).gazex(sidx) = nan;
+                sessions(sessionnr).trials(trialnr).gazey(sidx) = nan;
+                sessions(sessionnr).trials(trialnr).pupil(sidx) = nan;
+
             elseif strcmpi(m, '00001111') %stimulation
                 sessions(sessionnr).trials(trialnr).stim = edfdata.FEVENT(nextevent).sttime;
 

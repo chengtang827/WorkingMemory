@@ -95,6 +95,18 @@ function sessions  = parseEDFData(obj,edfdata,nrows,ncols)
                     end
                   end
                 end
+                %add eye gaze data as well
+                %figure out which eye was tracked
+                if edfdata.FSAMPLE.gx(1,1) == -32768
+                  tracked_eye = 2;
+                else
+                  tracked_eye = 1;
+                end
+                tidx = ((edfdata.FSAMPLE.time < sessions(sessionnr).trials(trialnr).end) &...
+                        (edfdata.FSAMPLE.time > sessions(sessionnr).trials(trialnr).start));
+                sessions(sessionnr).trials(trialnr).gazex = double(edfdata.FSAMPLE.gx(tracked_eye,tidx));
+                sessions(sessionnr).trials(trialnr).gazey = double(edfdata.FSAMPLE.gy(tracked_eye,tidx));
+                sessions(sessionnr).trials(trialnr).pupil = double(edfdata.FSAMPLE.pa(tracked_eye,tidx));
             elseif strcmpi(m, '00001111') %stimulation
                 sessions(sessionnr).trials(trialnr).stim = edfdata.FEVENT(nextevent).sttime;
 

@@ -30,22 +30,21 @@ end
 
 % add code for plot options here
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ntrials = length(tidx);
+ff = fieldnames(obj.data.trials);
+fidx = [];
+%get rid of eye fields since we don't want to plot those here
+for fi=1:length(ff)
+	if strcmpi(ff{fi},'gazex') | strcmpi(ff{fi},'gazey') | strcmpi(ff{fi}, 'pupil')
+		continue
+	else
+		fidx = [fidx fi];
+	end
+end
+%create perceptually distinguisable colors for plotting
+plot_colors = distinguishable_colors(length(ff));
 
 if ~Args.TrialLevel
-	ntrials = length(tidx);
-	ff = fieldnames(obj.data.trials);
-	fidx = [];
-	%get rid of eye fields since we don't want to plot those here
-	for fi=1:length(ff)
-		if strcmpi(ff{fi},'gazex') | strcmpi(ff{fi},'gazey') | strcmpi(ff{fi}, 'pupil')
-			continue
-		else
-			fidx = [fidx fi];
-		end
-	end
-
-	%create perceptually distinguisable colors for plotting
-	plot_colors = distinguishable_colors(length(ff));
 	ydata = nan(ntrials,length(fidx));
 	for t = 1:ntrials
 		t0 = obj.data.trials(tidx(t)).start;
@@ -101,7 +100,25 @@ else
 	hold(ax1, 'on')
 	plot(ax1, obj.data.trials(tidx).gazex)
 	plot(ax1, obj.data.trials(tidx).gazey)
-	legend(ax1, 'gazex', 'gazey')
+	%plot triggers
+	t0 = obj.data.trials(tidx).start;
+	k = 3; %keep track of legends
+	legends = {'gazex', 'gazey'};
+	for fi=1:length(fidx)
+		if ~isempty(obj.data.trials(tidx).(ff{fidx(fi)}))
+			xx = obj.data.trials(tidx).(ff{fidx(fi)});
+			if isstruct(xx)
+				t = double(xx.timestamp-t0);
+			else
+				t = double(xx-t0);
+			end
+			plot(ax1, [t t], ylim, 'color',plot_colors(fi,:))
+			legends{k} = strrep(ff{fidx(fi)}, '_','');
+			k = k + 1;
+		end
+	end
+
+	legend(ax1, legends)
 	hold(ax1, 'off')
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

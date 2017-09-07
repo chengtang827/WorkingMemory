@@ -30,7 +30,7 @@ function sessions  = parseEDFData(obj,edfdata,nrows,ncols)
         ncols = 5;
         nrows = 5;
     end
-    required_fields = {'start', 'end', 'fixation_start', 'resoonse_cue',...
+    required_fields = {'start', 'end', 'fixation_start', 'response_cue',...
                        'failure','delay', 'reward', 'target','distractor'};
     nevents = length(edfdata.FEVENT);
     trialnr = 0;

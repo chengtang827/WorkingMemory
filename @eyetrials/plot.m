@@ -85,6 +85,8 @@ for t=1:ntrials
 	plot(ax2, obj.data.trials(tidx(t)).gazex, obj.data.trials(tidx(t)).gazey,...
 			'color',[0.0,0.749,1.0]);
 end
+xlim(ax2, [0 obj.data.screen_size(1)]);
+ylim(ax2, [0 obj.data.screen_size(2)]);
 hold(ax2, 'off')
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -112,7 +112,8 @@ else
 			else
 				t = double(xx-t0);
 			end
-			plot(ax1, [t t], ylim, 'color',plot_colors(fi,:))
+			plot(ax1, [t t], ylim, 'color',plot_colors(fi,:),...
+				   'linewidth', 2.0)
 			legends{k} = strrep(ff{fidx(fi)}, '_','');
 			k = k + 1;
 		end

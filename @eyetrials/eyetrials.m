@@ -69,7 +69,7 @@ if(dnum>0)
     % these are object specific fields
     data.dlist = dlist;
     [pathstr,name,ext] = fileparts(dlist(1).name);
-    if strcmp(ext,".mat")
+    if strcmp(ext,'.mat')
       load(dlist(1).name);
     else
       edfdata = edfmex(dlist(1).name);

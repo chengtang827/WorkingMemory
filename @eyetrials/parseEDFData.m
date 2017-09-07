@@ -117,7 +117,7 @@ function sessions  = parseEDFData(obj,edfdata,nrows,ncols)
                 sessions(sessionnr).trials(trialnr).stim = edfdata.FEVENT(nextevent).sttime;
 
       	    elseif strcmpi(m(1:3), '110') %session start
-      		    sessionnr = sessionnr + 1 %bin2dec(m(4:end));
+      		    sessionnr = sessionnr + 1; %bin2dec(m(4:end));
       		    sessions(sessionnr).trials = struct;
       		    trialnr = 0; %reset the trial counter
             end

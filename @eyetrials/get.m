@@ -24,7 +24,7 @@ elseif(Args.AnalysisLevel)
 	r = 'Single';
 elseif(Args.TrialLevel)
 	%total number of trials
-	r = obj.data.n*(numberOfTrialsPerSession);
+	r = length(obj.data.setIndex);
 else
 	% if we don't recognize and of the options, pass the call to parent
 	% in case it is to get number of events, which has to go all the way

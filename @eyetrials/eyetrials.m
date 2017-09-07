@@ -76,6 +76,9 @@ if(dnum>0)
     end
     trialdata = parseEDFData(eyetrials, edfdata);
     data.trials = trialdata.trials;
+    %get the screen size
+    screen_size_str = split(edfdata.FEVENT(1).message);
+    data.screen_size = [str2double(screen_size_str{end-1}) str2double(screen_size_str{end})];
     ntrials = length(data.trials);
     % create nptdata so we can inherit from it
     data.Args = Args;

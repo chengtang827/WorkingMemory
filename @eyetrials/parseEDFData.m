@@ -43,7 +43,7 @@ function sessions  = parseEDFData(obj,edfdata,nrows,ncols)
         end
         m = strrep(edfdata.FEVENT(nextevent).message, ' ', '');
         if ~isempty(m)
-            if ((m(1) == '0') && (m(2) == '1')) %target
+            if strcmp(m(1:3), '101') %target
                 %get the row and column index
                 if length(m) == 8
                     px = bin2dec(m(5:-1:3));
@@ -55,7 +55,7 @@ function sessions  = parseEDFData(obj,edfdata,nrows,ncols)
 
                 sessions(sessionnr).trials(trialnr).target = struct('row', py, 'column', px, 'timestamp', edfdata.FEVENT(nextevent).sttime);
 
-            elseif ((m(1) == '1') && (m(2) == '0'))  %distractor
+            elseif strcmp(m(1:3), '011')  %distractor
                 if length(m) == 8
                     px = bin2dec(m(5:-1:3));
                     py = bin2dec(m(8:-1:6));

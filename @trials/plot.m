@@ -26,18 +26,6 @@ end
 % add code for plot options here
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-if ~exist('session1','var')
-    load([obj.data.dlist.folder '\' obj.data.dlist(1).name]);
-end
-
-trial = session1.trials(n);
-
-h(1) = plot(1:0.5:length(trial.gazex)/2+0.5,trial.gazex(1,:));
-hold on;
-h(2) = plot(1:0.5:length(trial.gazey)/2+0.5,trial.gazey(1,:));
-legend(h,{'X','Y'},'Location','best');
-hold off;
-
 % @dirfiles/PLOT takes 'LabelsOff' as an example
 if(~Args.LabelsOff)
 	xlabel('X Axis')

@@ -1,4 +1,4 @@
-function sessions  = parseEDFData(obj,edfdata,nrows,ncols)
+function sessions  = parseEDFData(obj,edfdata,triggers)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Parse eye link data into a trial structure
     %Input:

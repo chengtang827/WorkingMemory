@@ -74,7 +74,9 @@ if(dnum>0)
     else
       edfdata = edfmex(dlist(1).name);
     end
-    trialdata = parseEDFData(eyetrials, edfdata);
+    triggers = {{'trial_start' '00000001'},...
+                {'trial_end' '00100000'}};
+    trialdata = parseEDFData(eyetrials, edfdata, triggers);
     data.trials = trialdata.trials;
     %get the screen size
     screen_size_str = split(edfdata.FEVENT(1).message);

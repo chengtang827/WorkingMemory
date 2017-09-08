@@ -135,7 +135,7 @@ if ~isempty(dlist)
             d.data = data;
             obj = class(d,Args.classname,n);
             saveObject(obj,'ArgsC',Args);
-    else
+    elseif exist('../event_markers.txt')
         cd ..
         if exist('event_markers.txt')
             A = importdata('event_markers.txt');
@@ -160,6 +160,8 @@ if ~isempty(dlist)
         else
             obj = createEmptyObject(Args);
         end
+    else
+         obj = createEmptyObject(Args);
     end
 else
     % create empty object

@@ -41,6 +41,7 @@ if ~strcmpi(Args.Alignment,'start') || ~isempty(Args.Sortby)
 		cwd = pwd;
 		cd(session_dir);
 		tr = trials('auto',varargin{:});
+		et = eyetrials('auto',varargin{:});
 		cd(cwd);
 		if ~strcmpi(Args.Alignment, 'start')
 			if ~isfield(tr.data.trials(1),Args.Alignment)
@@ -51,16 +52,25 @@ if ~strcmpi(Args.Alignment,'start') || ~isempty(Args.Sortby)
 			end
 		end
 		if ~isempty(Args.Sortby)
-			if ~isfield(tr.data.trials(1), Args.Sortby)
-				warn('Invalid sorting request')
+			if strcmpi(Args.Sortby, 'saccade')
+				ts = get(et, 'EventTiming','saccade');
+				t0 = get(et, 'EventTiming','start');
+				sortby = double(ts-t0)/1000;
+				sortby(sortby < 0.0) = 0.0;
+			elseif ~isfield(tr.data.trials(1), Args.Sortby)
+				warning('Invalid sorting request')
+			else
+				sortby = get(tr, 'EventTiming',Args.Sortby);
 			end
-			sortby = get(tr, 'EventTiming',Args.Sortby);
 			[ss,qidx] = sort(sortby);
 			otrialidx = obj.data.trialidx(sidx);
 			for t = 1:length(ss)
 				idx = otrialidx==qidx(t); %find the trials with index sidx(t)
 				trialidx(idx) = t;
 			end
+			cla
+			plot(ss, 1:length(ss), '.k')
+			hold on
 		end
 	end
 end

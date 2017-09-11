@@ -38,88 +38,87 @@ function sessions  = parseEDFData(obj,edfdata,triggers)
     sessionnr = 0;
     k = 1;
     for nextevent=1:nevents
-        if isempty(edfdata.FEVENT(nextevent).message)
-            continue
-        end
-        m = strrep(edfdata.FEVENT(nextevent).message, ' ', '');
-        if ~isempty(m)
-            if strcmp(m(1:3), '101') %target
-                %get the row and column index
-                if length(m) == 8
-                    px = bin2dec(m(5:-1:3));
-                    py = bin2dec(m(8:-1:6));
-                elseif length(m) == 14
-                    px = bin2dec(m(8:-1:3));
-                    py = bin2dec(m(end:-1:9));
-                end
+        if ~isempty(edfdata.FEVENT(nextevent).message)
+          m = strrep(edfdata.FEVENT(nextevent).message, ' ', '');
+          if ~isempty(m)
+              if strcmp(m(1:3), '101') %target
+                  %get the row and column index
+                  if length(m) == 8
+                      px = bin2dec(m(5:-1:3));
+                      py = bin2dec(m(8:-1:6));
+                  elseif length(m) == 14
+                      px = bin2dec(m(8:-1:3));
+                      py = bin2dec(m(end:-1:9));
+                  end
 
-                sessions(sessionnr).trials(trialnr).target = struct('row', py, 'column', px, 'timestamp', edfdata.FEVENT(nextevent).sttime);
+                  sessions(sessionnr).trials(trialnr).target = struct('row', py, 'column', px, 'timestamp', edfdata.FEVENT(nextevent).sttime);
 
-            elseif strcmp(m(1:3), '011')  %distractor
-                if length(m) == 8
-                    px = bin2dec(m(5:-1:3));
-                    py = bin2dec(m(8:-1:6));
-                elseif length(m) == 14
-                    px = bin2dec(m(8:-1:3));
-                    py = bin2dec(m(end:-1:9));
-                end
-                sessions(sessionnr).trials(trialnr).distractor = struct('row', py, 'column', px, 'timestamp', edfdata.FEVENT(nextevent).sttime);
-            elseif strcmp(m, '00000010') %trial start
-                trialnr  = trialnr + 1;
-                k = 1;
-                trialstart = edfdata.FEVENT(nextevent).sttime;
-                sessions(sessionnr).trials(trialnr).start = trialstart;
-                %sessions(sessionnr).trials(trialnr).saccade = struct;
-            elseif strcmp(m,'00000101') %go-cueue
-                sessions(sessionnr).trials(trialnr).response_cue = edfdata.FEVENT(nextevent).sttime;
-            elseif strcmp(m,'00000110') %reward
-                sessions(sessionnr).trials(trialnr).reward = edfdata.FEVENT(nextevent).sttime;
-            elseif strcmp(m,'00000111') %failure
-                sessions(sessionnr).trials(trialnr).failure = edfdata.FEVENT(nextevent).sttime;
-            elseif strcmpi(m,'00000011') %stimulus blank
-                sessions(sessionnr).trials(trialnr).stimblank = edfdata.FEVENT(nextevent).sttime;
-            elseif strcmpi(m,'00000100') %delay
-                sessions(sessionnr).trials(trialnr).delay = edfdata.FEVENT(nextevent).sttime;
-            elseif strcmpi(m,'00000001') %fixation start
-                sessions(sessionnr).trials(trialnr).fixation_start = edfdata.FEVENT(nextevent).sttime;
-            elseif strcmpi(m,'00100000') %trial end
-                sessions(sessionnr).trials(trialnr).end = edfdata.FEVENT(nextevent).sttime;
-                %make sure we have all required fields, if not fill them with nan
-                for fi = 1:length(required_fields)
-                  if ~isfield(sessions(sessionnr).trials(trialnr),required_fields{fi})
-                    if (strcmpi(required_fields{fi},'distractor') ||...
-                        strcmpi(required_fields{fi},'target'))
-                      sessions(sessionnr).trials(trialnr).(required_fields{fi}) = struct('row', 0, 'column',0, 'timestamp', nan);
-                    else
-                      sessions(sessionnr).trials(trialnr).(required_fields{fi}) = nan;
+              elseif strcmp(m(1:3), '011')  %distractor
+                  if length(m) == 8
+                      px = bin2dec(m(5:-1:3));
+                      py = bin2dec(m(8:-1:6));
+                  elseif length(m) == 14
+                      px = bin2dec(m(8:-1:3));
+                      py = bin2dec(m(end:-1:9));
+                  end
+                  sessions(sessionnr).trials(trialnr).distractor = struct('row', py, 'column', px, 'timestamp', edfdata.FEVENT(nextevent).sttime);
+              elseif strcmp(m, '00000010') %trial start
+                  trialnr  = trialnr + 1;
+                  k = 1;
+                  trialstart = edfdata.FEVENT(nextevent).sttime;
+                  sessions(sessionnr).trials(trialnr).start = trialstart;
+                  %sessions(sessionnr).trials(trialnr).saccade = struct;
+              elseif strcmp(m,'00000101') %go-cueue
+                  sessions(sessionnr).trials(trialnr).response_cue = edfdata.FEVENT(nextevent).sttime;
+              elseif strcmp(m,'00000110') %reward
+                  sessions(sessionnr).trials(trialnr).reward = edfdata.FEVENT(nextevent).sttime;
+              elseif strcmp(m,'00000111') %failure
+                  sessions(sessionnr).trials(trialnr).failure = edfdata.FEVENT(nextevent).sttime;
+              elseif strcmpi(m,'00000011') %stimulus blank
+                  sessions(sessionnr).trials(trialnr).stimblank = edfdata.FEVENT(nextevent).sttime;
+              elseif strcmpi(m,'00000100') %delay
+                  sessions(sessionnr).trials(trialnr).delay = edfdata.FEVENT(nextevent).sttime;
+              elseif strcmpi(m,'00000001') %fixation start
+                  sessions(sessionnr).trials(trialnr).fixation_start = edfdata.FEVENT(nextevent).sttime;
+              elseif strcmpi(m,'00100000') %trial end
+                  sessions(sessionnr).trials(trialnr).end = edfdata.FEVENT(nextevent).sttime;
+                  %make sure we have all required fields, if not fill them with nan
+                  for fi = 1:length(required_fields)
+                    if ~isfield(sessions(sessionnr).trials(trialnr),required_fields{fi})
+                      if (strcmpi(required_fields{fi},'distractor') ||...
+                          strcmpi(required_fields{fi},'target'))
+                        sessions(sessionnr).trials(trialnr).(required_fields{fi}) = struct('row', 0, 'column',0, 'timestamp', nan);
+                      else
+                        sessions(sessionnr).trials(trialnr).(required_fields{fi}) = nan;
+                      end
                     end
                   end
-                end
-                %add eye gaze data as well
-                %figure out which eye was tracked
-                if edfdata.FSAMPLE.gx(1,1) == -32768
-                  tracked_eye = 2;
-                else
-                  tracked_eye = 1;
-                end
-                tidx = ((edfdata.FSAMPLE.time < sessions(sessionnr).trials(trialnr).end) &...
-                        (edfdata.FSAMPLE.time > sessions(sessionnr).trials(trialnr).start));
-                sessions(sessionnr).trials(trialnr).gazex = double(edfdata.FSAMPLE.gx(tracked_eye,tidx));
-                sessions(sessionnr).trials(trialnr).gazey = double(edfdata.FSAMPLE.gy(tracked_eye,tidx));
-                sessions(sessionnr).trials(trialnr).pupil = double(edfdata.FSAMPLE.pa(tracked_eye,tidx));
-                %filter out saturated points
-                sidx = sessions(sessionnr).trials(trialnr).gazex == 100000000;
-                sessions(sessionnr).trials(trialnr).gazex(sidx) = nan;
-                sessions(sessionnr).trials(trialnr).gazey(sidx) = nan;
-                sessions(sessionnr).trials(trialnr).pupil(sidx) = nan;
+                  %add eye gaze data as well
+                  %figure out which eye was tracked
+                  if edfdata.FSAMPLE.gx(1,1) == -32768
+                    tracked_eye = 2;
+                  else
+                    tracked_eye = 1;
+                  end
+                  tidx = ((edfdata.FSAMPLE.time < sessions(sessionnr).trials(trialnr).end) &...
+                          (edfdata.FSAMPLE.time > sessions(sessionnr).trials(trialnr).start));
+                  sessions(sessionnr).trials(trialnr).gazex = double(edfdata.FSAMPLE.gx(tracked_eye,tidx));
+                  sessions(sessionnr).trials(trialnr).gazey = double(edfdata.FSAMPLE.gy(tracked_eye,tidx));
+                  sessions(sessionnr).trials(trialnr).pupil = double(edfdata.FSAMPLE.pa(tracked_eye,tidx));
+                  %filter out saturated points
+                  sidx = sessions(sessionnr).trials(trialnr).gazex == 100000000;
+                  sessions(sessionnr).trials(trialnr).gazex(sidx) = nan;
+                  sessions(sessionnr).trials(trialnr).gazey(sidx) = nan;
+                  sessions(sessionnr).trials(trialnr).pupil(sidx) = nan;
 
-            elseif strcmpi(m, '00001111') %stimulation
-                sessions(sessionnr).trials(trialnr).stim = edfdata.FEVENT(nextevent).sttime;
+              elseif strcmpi(m, '00001111') %stimulation
+                  sessions(sessionnr).trials(trialnr).stim = edfdata.FEVENT(nextevent).sttime;
 
-      	    elseif strcmpi(m(1:3), '110') %session start
-      		    sessionnr = sessionnr + 1; %bin2dec(m(4:end));
-      		    sessions(sessionnr).trials = struct;
-      		    trialnr = 0; %reset the trial counter
+        	    elseif strcmpi(m(1:3), '110') %session start
+        		    sessionnr = sessionnr + 1; %bin2dec(m(4:end));
+        		    sessions(sessionnr).trials = struct;
+        		    trialnr = 0; %reset the trial counter
+              end
             end
         else
             if strcmpi(edfdata.FEVENT(nextevent).codestring, 'ENDSACC')

@@ -80,7 +80,7 @@ function sessions  = parseEDFData(obj,edfdata,triggers)
               elseif strcmpi(m,'00000100') %delay
                   sessions(sessionnr).trials(trialnr).delay = edfdata.FEVENT(nextevent).sttime;
               elseif strcmpi(m,'00000001') %fixation start
-                  sessions(sessionnr).trials(trialnr).fixation_start = edfdata.FEVENT(nextevent).sttime;
+                  sessions(sessionnr).trials(trialnr).fixation = edfdata.FEVENT(nextevent).sttime;
                 elseif strcmpi(m, '0001110') %left fixation
                   sessions(sessionnr).trials(trialnr).left_fixation = edfdata.FEVENT(nextevent).sttime;
               elseif strcmpi(m,'00100000') %trial end

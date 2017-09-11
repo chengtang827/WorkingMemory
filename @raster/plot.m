@@ -4,7 +4,7 @@ function [obj, varargout] = plot(obj,varargin)
 %   response.
 
 Args = struct('LabelsOff',0,'GroupPlots',1,'GroupPlotIndex',1,'Color','b', ...
-		  'ReturnVars',{''}, 'ArgsOnly',0);
+		  'ReturnVars',{''}, 'ArgsOnly',0, 'Alignment','start','Sortby','');
 Args.flags = {'LabelsOff','ArgsOnly'};
 [Args,varargin2] = getOptArgs(varargin,Args);
 
@@ -21,13 +21,50 @@ if(~isempty(Args.NumericArguments))
 	sidx = find(obj.data.setIndex==n);
 else
 	% plot all data
-	sidx = 1:length(obj.data.setIndex)
+	sidx = 1:length(obj.data.setIndex);
 end
 
 % add code for plot options here
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-plot(obj.data.spiketimes(sidx), obj.data.trialidx(sidx),'.');
+%re-align raster if requested
+spiketimes = obj.data.spiketimes(sidx);
+trialidx = obj.data.trialidx(sidx);
+if ~strcmpi(Args.Alignment,'start') || ~isempty(Args.Sortby)
+	if isempty(Args.NumericArguments)
+		warn('Realining and sorting multiple sessions is not implmented yet')
+	else
+		%load the trial structure to get the new alignment
+		%get the session directory for the request plot
+		dd = nptdata(obj);
+		session_dir = getDataDirNew('session','DirString', dd.SessionDirs{n});
+		cwd = pwd;
+		cd(session_dir);
+		tr = trials('auto',varargin{:});
+		cd(cwd);
+		if ~strcmpi(Args.Alignment, 'start')
+			if ~isfield(tr.data.trials(1),Args.Alignment)
+				warn('Invalid alignemnt request')
+			end
+			for t = 1:length(tr.data.trials)
+				idx = obj.data.trialidx==t;
+			end
+		end
+		if ~isempty(Args.Sortby)
+			if ~isfield(tr.data.trials(1), Args.Sortby)
+				warn('Invalid sorting request')
+			end
+			sortby = get(tr, 'EventTiming',Args.Sortby);
+			[ss,qidx] = sort(sortby);
+			otrialidx = obj.data.trialidx(sidx);
+			for t = 1:length(ss)
+				idx = otrialidx==qidx(t); %find the trials with index sidx(t)
+				trialidx(idx) = t;
+			end
+		end
+	end
+end
+plot(spiketimes, trialidx,'.');
 if(~Args.LabelsOff)
 	xlabel('X Axis')
 	ylabel('Y Axis')

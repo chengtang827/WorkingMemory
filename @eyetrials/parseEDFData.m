@@ -51,7 +51,7 @@ function sessions  = parseEDFData(obj,edfdata,triggers)
                       py = bin2dec(m(end:-1:9));
                   end
 
-                  sessions(sessionnr).trials(trialnr).target = struct('row', py, 'column', px, 'timestamp', edfdata.FEVENT(nextevent).sttime);
+                  sessions(sessionnr).trials(trialnr).target = struct('row', py, 'column', px, 'onset', edfdata.FEVENT(nextevent).sttime);
 
               elseif strcmp(m(1:3), '011')  %distractor
                   if length(m) == 8
@@ -61,7 +61,7 @@ function sessions  = parseEDFData(obj,edfdata,triggers)
                       px = bin2dec(m(8:-1:3));
                       py = bin2dec(m(end:-1:9));
                   end
-                  sessions(sessionnr).trials(trialnr).distractor = struct('row', py, 'column', px, 'timestamp', edfdata.FEVENT(nextevent).sttime);
+                  sessions(sessionnr).trials(trialnr).distractor = struct('row', py, 'column', px, 'onset', edfdata.FEVENT(nextevent).sttime);
               elseif strcmp(m, '00000010') %trial start
                   trialnr  = trialnr + 1;
                   k = 1;
@@ -87,7 +87,7 @@ function sessions  = parseEDFData(obj,edfdata,triggers)
                     if ~isfield(sessions(sessionnr).trials(trialnr),required_fields{fi})
                       if (strcmpi(required_fields{fi},'distractor') ||...
                           strcmpi(required_fields{fi},'target'))
-                        sessions(sessionnr).trials(trialnr).(required_fields{fi}) = struct('row', 0, 'column',0, 'timestamp', nan);
+                        sessions(sessionnr).trials(trialnr).(required_fields{fi}) = struct('row', 0, 'column',0, 'onset', nan);
                       else
                         sessions(sessionnr).trials(trialnr).(required_fields{fi}) = nan;
                       end
@@ -129,7 +129,7 @@ function sessions  = parseEDFData(obj,edfdata,triggers)
                 %if strcmp(m,'00000101') %go-cueue
                 event = edfdata.FEVENT(nextevent);
                 if sessionnr > 0 && trialnr > 0 && event.sttime > trialstart
-                    sessions(sessionnr).trials(trialnr).saccade(k) = struct('startx', event.gstx, 'starty', event.gsty, 'endx', event.genx', 'endy', event.geny, 'start_time', event.sttime, 'end_time', event.entime);
+                    sessions(sessionnr).trials(trialnr).saccade(k) = struct('startx', event.gstx, 'starty', event.gsty, 'endx', event.genx', 'endy', event.geny, 'onset', event.sttime, 'offset', event.entime);
                     k = k+1;
                 end
             end

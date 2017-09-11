@@ -50,10 +50,13 @@ if ~Args.TrialLevel
 		t0 = obj.data.trials(tidx(t)).start;
 		ydata(t,1) = double(t0)/1000.0;
 		for fi=1:length(fidx)
+			if strcmpi(ff{fidx(fi)},'saccade')
+				continue %ksip saccade
+			end
 			if ~isempty(obj.data.trials(tidx(t)).(ff{fidx(fi)}))
 				xx = obj.data.trials(tidx(t)).(ff{fidx(fi)});
 				if isstruct(xx)
-					ydata(t,fi) = double(xx.timestamp-t0)/1000.0;
+					ydata(t,fi) = double(xx.onset-t0)/1000.0;
 				else
 					ydata(t,fi) = double(xx-t0)/1000.0;
 				end
@@ -105,10 +108,13 @@ else
 	k = 3; %keep track of legends
 	legends = {'gazex', 'gazey'};
 	for fi=1:length(fidx)
+		if strcmpi(ff{fidx(fi)},'saccade')
+			continue %ksip saccade
+		end
 		if ~isempty(obj.data.trials(tidx).(ff{fidx(fi)}))
 			xx = obj.data.trials(tidx).(ff{fidx(fi)});
 			if isstruct(xx)
-				t = double(xx.timestamp-t0);
+				t = double(xx.onset - t0);
 			else
 				t = double(xx-t0);
 			end

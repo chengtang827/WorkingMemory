@@ -27,7 +27,7 @@ elseif(Args.TrialLevel)
 	%total number of trials
 	r = length(obj.data.setIndex);
 elseif ~isempty(Args.EventTiming)
-  ts = zeros(length(obj.data.trials),1);
+  ts = nan(length(obj.data.trials),1);
   if isfield(obj.data.trials(1),Args.EventTiming)
 		if strcmpi(Args.EventTiming,'saccade')
 			%find the saccade immediately preceeding either reward or failure
@@ -36,8 +36,10 @@ elseif ~isempty(Args.EventTiming)
 					q = obj.data.trials(t).(Args.EventTiming);
 					if ~isnan(obj.data.trials(t).failure)
 						tf = obj.data.trials(t).failure;
-					else
+					elseif ~isnan(obj.data.trials(t).reward)
 						tf = obj.data.trials(t).reward;
+          else
+            tf = nan;
 					end
 					i = 1;
 					while (i < length(q)) && (q(i).onset < tf)
@@ -52,6 +54,7 @@ elseif ~isempty(Args.EventTiming)
         end
 			end
     elseif isstruct(obj.data.trials(1).(Args.EventTiming))
+
         for t = 1:length(obj.data.trials)
           if ~isempty(obj.data.trials(t).(Args.EventTiming))
             ts(t) = obj.data.trials(t).(Args.EventTiming).onset;

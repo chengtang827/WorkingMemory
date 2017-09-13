@@ -78,6 +78,12 @@ if Args.TrialLevel
 	end
 	legend(ax1, legends)
 	hold(ax1, 'off')
+	if session_idx == 1
+		trialidx = tidx;
+	else
+		trialidx = tidx - sum(obj.data.setIndex < session_idx);
+	end
+	title([session_name 't' num2str(trialidx)])
 elseif Args.ReactionTime
 	cwd = pwd;
 	cd(session_dir);

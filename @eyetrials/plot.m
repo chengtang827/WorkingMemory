@@ -41,9 +41,13 @@ for fi=1:length(ff)
 		fidx = [fidx fi];
 	end
 end
+%get the session directory
+nd = nptdata(obj);
+session_idx = unique(obj.data.setIndex(tidx));
+session_dir = nd.SessionDirs{session_idx};
+session_name = getDataOrder('ShortName','DirString', session_dir);
 %create perceptually distinguisable colors for plotting
 plot_colors = distinguishable_colors(length(ff));
-
 if Args.TrialLevel
 	%plot a single trial
 	ax1 = subplot(1, 1, 1);
@@ -75,10 +79,6 @@ if Args.TrialLevel
 	legend(ax1, legends)
 	hold(ax1, 'off')
 elseif Args.ReactionTime
-	%get the session directory
-	nd = nptdata(obj);
-	session_dir = nd.SessionDirs{n};
-	%get experimental results
 	cwd = pwd;
 	cd(session_dir);
 	dlist = nptDir('*_results.txt');

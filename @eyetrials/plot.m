@@ -87,18 +87,29 @@ if Args.TrialLevel
 elseif Args.ReactionTime
 	cwd = pwd;
 	cd(session_dir);
+	%get experimental results
 	dlist = nptDir('*_results.txt');
 	if length(dlist) >= 1
 		dd = readtable(dlist(1).name);
-		delta_t = dd.response_on - dd.target_on;
-		%get only correct trials
-		idx = find((dd.response_on > 0)&(dd.reward_on > 0));
+		%trials without start trigger are included in eyetrials
+		qidx = find(dd.trial_start > 0);
+		delta_t = dd.response_on(qidx) - dd.target_on(qidx);
+		%trials without end triggers are not recorded in dd
+		end_time = get(obj, 'EventTiming','end');
+		vidx = find(end_time > 0);
 		saccade_time = get(obj, 'EventTiming', 'saccade');
 		target_time = get(obj, 'EventTiming', 'target');
-		scatter(delta_t(idx), (saccade_time(idx) - target_time(idx))/1000);
+		saccade_time = saccade_time(vidx);
+		target_time = target_time(vidx);
+		%get only correct trials
+		idx = find((dd.response_on(qidx) > 0)&(dd.reward_on(qidx) > 0));
+		delta_saccade = (saccade_time(idx) - target_time(idx))/1000;
+		delta_t = delta_t(idx);
+		scatter(delta_t, delta_saccade);
+		[r,pv] = corr(delta_t, delta_saccade)
 		hold on
-		mii = min(delta_t(idx));
-		mx = max(delta_t(idx));
+		mii = min(delta_t);
+		mx = max(delta_t);
 		plot([mii mx], [mii mx]);
 		xlabel('Response cue time [s]')
 		ylabel('Reaction time [s]')

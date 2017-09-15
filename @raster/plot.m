@@ -75,10 +75,12 @@ if ~strcmpi(Args.Alignment,'start') || ~isempty(Args.Sortby)
 	end
 end
 plot(spiketimes, trialidx,'.');
+title(getDataOrder('ShortName','DirString', dd.SessionDirs{n}));
 if(~Args.LabelsOff)
 	xlabel('X Axis')
 	ylabel('Y Axis')
 end
+hold off
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -101,16 +101,19 @@ elseif Args.ReactionTime
 		target_time = get(obj, 'EventTiming', 'target');
 		saccade_time = saccade_time(vidx);
 		target_time = target_time(vidx);
+		idx = find((dd.response_on(qidx) > 0));
 		%get only correct trials
-		idx = find((dd.response_on(qidx) > 0)&(dd.reward_on(qidx) > 0));
+		%idx = find((dd.response_on(qidx) > 0)&(dd.reward_on(qidx) > 0));
 		delta_saccade = (saccade_time(idx) - target_time(idx))/1000;
 		delta_t = delta_t(idx);
 		scatter(delta_t, delta_saccade);
-		[r,pv] = corr(delta_t, delta_saccade)
-		hold on
-		mii = min(delta_t);
-		mx = max(delta_t);
-		plot([mii mx], [mii mx]);
+		if ~isempty(delta_t) && ~isempty(delta_saccade)
+			[r,pv] = corr(delta_t, delta_saccade)
+			hold on
+			mii = min(delta_t);
+			mx = max(delta_t);
+			plot([mii mx], [mii mx]);
+		end
 		xlabel('Response cue time [s]')
 		ylabel('Reaction time [s]')
 		hold off

@@ -4,8 +4,10 @@ function [obj, varargout] = plot(obj,varargin)
 %   response.
 
 Args = struct('LabelsOff',0,'GroupPlots',1,'GroupPlotIndex',1,'Color','b', ...
-		  'ReturnVars',{''}, 'ArgsOnly',0,'TrialLevel',0,'ReactionTime',0);
-Args.flags = {'LabelsOff','ArgsOnly','TrialLevel','ReactionTime'};
+		  'ReturnVars',{''}, 'ArgsOnly',0,'TrialLevel',0,'ReactionTime',0,...
+			'ResponseTimeHist',0);
+Args.flags = {'LabelsOff','ArgsOnly','TrialLevel','ReactionTime',...
+							'ResponseTimeHist'};
 [Args,varargin2] = getOptArgs(varargin,Args);
 
 % if user select 'ArgsOnly', return only Args structure for an empty object
@@ -119,6 +121,12 @@ elseif Args.ReactionTime
 		hold off
 	end
 	cd(cwd);
+elseif Args.ResponseTimeHist
+	saccade_time = get(obj, 'EventTiming', 'saccade');
+	target_time = get(obj, 'EventTiming', 'target');
+	rtime = saccade_time - target_time;
+	hist(rtime(rtime > 0)/1000)
+	xlabel('Response time - target onset time [s]')
 else
 	ydata = nan(ntrials,length(fidx));
 	for t = 1:ntrials

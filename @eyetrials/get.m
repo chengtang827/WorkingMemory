@@ -30,6 +30,7 @@ elseif ~isempty(Args.Event)
   if strcmpi(Args.Event,'response_saccade')
     %response_saccade = struct;
     for t = 1:length(obj.data.trials)
+      ff = fieldnames(obj.data.trials(1).saccade);
       if ~isempty(obj.data.trials(t).saccade)
         q = obj.data.trials(t).saccade;
         if ~isnan(obj.data.trials(t).failure)
@@ -45,6 +46,11 @@ elseif ~isempty(Args.Event)
         end
         if i == 1
           ts(t) = nan;
+          qq = struct;
+          for fi = 1:length(ff)
+            qq.(ff{fi}) = nan;
+          end
+          response_saccade(t) = qq;
         else
           i = i -1;
           ts(t) = q(i).onset;
@@ -61,7 +67,9 @@ elseif ~isempty(Args.EventTiming)
 			%find the saccade immediately preceeding either reward or failure
       response_saccade = get(obj,'Event','response_saccade');
       for t = 1:length(obj.data.trials)
-        ts(t) = response_saccade(t).onset;
+        if ~isempty(response_saccade(t).onset)
+          ts(t) = response_saccade(t).onset;
+        end
       end
     elseif isstruct(obj.data.trials(1).(Args.EventTiming))
         for t = 1:length(obj.data.trials)

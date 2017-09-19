@@ -62,34 +62,38 @@ dnum = length(dlist);
 
 % check if the right conditions were met to create object
 if(dnum>0)
-    % this is a valid object
-    % these are fields that are useful for most objects
-    data.Args = Args;
-    data.numSets = 1;
-    % these are object specific fields
-    data.dlist = dlist;
-    [pathstr,name,ext] = fileparts(dlist(1).name);
-    if strcmp(ext,'.mat')
-      load(dlist(1).name);
+    if ~exist(dlist(1).name)
+      obj = createEmptyObject(Args);
     else
-      edfdata = edfmex(dlist(1).name);
+      % this is a valid object
+      % these are fields that are useful for most objects
+      data.Args = Args;
+      data.numSets = 1;
+      % these are object specific fields
+      data.dlist = dlist;
+      [pathstr,name,ext] = fileparts(dlist(1).name);
+      if strcmp(ext,'.mat')
+        load(dlist(1).name);
+      else
+        edfdata = edfmex(dlist(1).name);
+      end
+      triggers = {{'trial_start' '00000001'},...
+                  {'trial_end' '00100000'}};
+      trialdata = parseEDFData(eyetrials, edfdata, triggers);
+      data.trials = trialdata.trials;
+      %get the screen size
+      screen_size_str = split(edfdata.FEVENT(1).message);
+      data.screen_size = [str2double(screen_size_str{end-1}) str2double(screen_size_str{end})];
+      ntrials = length(data.trials);
+      % create nptdata so we can inherit from it
+      data.Args = Args;
+      % set index to keep track of which data goes with which directory
+      data.setIndex = ones(ntrials,1);
+      n = nptdata(data.numSets,0,pwd);
+      d.data = data;
+      obj = class(d,Args.classname,n);
+      saveObject(obj,'ArgsC', Args);
     end
-    triggers = {{'trial_start' '00000001'},...
-                {'trial_end' '00100000'}};
-    trialdata = parseEDFData(eyetrials, edfdata, triggers);
-    data.trials = trialdata.trials;
-    %get the screen size
-    screen_size_str = split(edfdata.FEVENT(1).message);
-    data.screen_size = [str2double(screen_size_str{end-1}) str2double(screen_size_str{end})];
-    ntrials = length(data.trials);
-    % create nptdata so we can inherit from it
-    data.Args = Args;
-    % set index to keep track of which data goes with which directory
-    data.setIndex = ones(ntrials,1);
-    n = nptdata(data.numSets,0,pwd);
-    d.data = data;
-    obj = class(d,Args.classname,n);
-    saveObject(obj,'ArgsC', Args);
 else
     % create empty object
     obj = createEmptyObject(Args);

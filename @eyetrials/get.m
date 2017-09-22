@@ -97,9 +97,12 @@ elseif Args.OldGrid
   ymargin = (screen_height - rows * squareArea) / 2;
   xdiff = (screen_width-2*xmargin)/cols;
   ydiff = (screen_height-2*ymargin)/rows;
+  center_x = repmat(xmargin + (0:(cols-1)).*xdiff + xdiff/2,rows,1);
+  center_y = repmat((ymargin + (0:(rows-1)).*ydiff + ydiff/2)', 1, cols);
   r = struct('rows', rows, 'columns', cols, 'screen_width',screen_width,...
              'screen_height',screen_height,'xmargin', xmargin,...
-             'ymargin', ymargin, 'xdiff', xdiff, 'ydiff', ydiff);
+             'ymargin', ymargin, 'xdiff', xdiff, 'ydiff', ydiff,...
+             'center_x',center_x, 'center_y', center_y);
 else
 	% if we don't recognize and of the options, pass the call to parent
 	% in case it is to get number of events, which has to go all the way

@@ -63,7 +63,7 @@ dnum = length(dlist);
 
 % check if the right conditions were met to create object
 if(dnum>0)
-    if ~exist(dlist(1).name)
+    if ~exist(dlist(1).name,'file')
       obj = createEmptyObject(Args);
     else
       % this is a valid object

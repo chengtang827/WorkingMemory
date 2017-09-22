@@ -5,7 +5,7 @@ function [obj, varargout] = plot(obj,varargin)
 
 Args = struct('LabelsOff',0,'GroupPlots',1,'GroupPlotIndex',1,'Color','b', ...
 		  'ReturnVars',{''}, 'ArgsOnly',0,'TrialLevel',0,'ReactionTime',0,...
-			'ResponseTimeHist',0);
+			'ResponseTimeHist',0,'ResponseSaccades',0);
 Args.flags = {'LabelsOff','ArgsOnly','TrialLevel','ReactionTime',...
 							'ResponseTimeHist'};
 [Args,varargin2] = getOptArgs(varargin,Args);
@@ -46,7 +46,11 @@ end
 %get the session directory
 nd = nptdata(obj);
 session_idx = unique(obj.data.setIndex(tidx));
-session_dir = nd.SessionDirs{session_idx};
+if session_idx <= length(nd.SessionDirs)
+	session_dir = nd.SessionDirs{session_idx};
+else
+	session_dir = nd.SessionDirs{1};
+end
 session_name = getDataOrder('ShortName','DirString', session_dir);
 %create perceptually distinguisable colors for plotting
 plot_colors = distinguishable_colors(length(ff));
@@ -127,6 +131,37 @@ elseif Args.ResponseTimeHist
 	rtime = saccade_time - target_time;
 	hist(rtime(rtime > 0)/1000)
 	xlabel('Response time - target onset time [s]')
+elseif Args.ResponseSaccades
+	saccade_x = [];
+	saccade_y = [];
+	ridx = [];
+	fidx = [];
+	saccades = get(obj, 'Event', 'response_saccade');
+	reward_time = get(obj, 'EventTiming','reward');
+	saccades = saccades(tidx);
+	reward_time = reward_time(tidx);
+	screen_height = obj.data.screen_size(2);
+	for i = 1:length(saccades)
+		if isnan(reward_time(i))
+			fidx = [fidx i];
+		else
+			ridx = [ridx i];
+		end
+		if ~isempty(saccades(i).endx)
+			saccade_x(i) = saccades(i).endx;
+			saccade_y(i) = screen_height - saccades(i).endy;
+		else
+			saccade_x(i) = nan;
+			saccade_y(i) = nan;
+		end
+	end
+	scatter(saccade_x(ridx), saccade_y(ridx))
+	hold on
+	scatter(saccade_x(fidx), saccade_y(fidx))
+	hold off
+	legend({'Rewarded', 'Failed'})
+	xlim([0 obj.data.screen_size(1)]);
+	ylim([0 obj.data.screen_size(2)]);
 else
 	ydata = nan(ntrials,length(fidx));
 	for t = 1:ntrials

@@ -10,8 +10,8 @@ function [r,varargout] = get(obj,varargin)
 %   Dependencies:
 
 Args = struct('ObjectLevel',0, 'AnalysisLevel',0, 'TrialLevel',0,...
- 							'EventTiming','','Event','');
-Args.flags ={'ObjectLevel','AnalysisLevel'};
+ 							'EventTiming','','Event','','OldGrid',0);
+Args.flags ={'ObjectLevel','AnalysisLevel','OldGrid'};
 Args = getOptArgs(varargin,Args);
 
 % set variables to default
@@ -86,6 +86,20 @@ elseif ~isempty(Args.EventTiming)
     end %if strcmpi(Args.EventTiming, 'saccade')
   end %if isfield(obj.data.trials(1),Args.EventTiming)
   r = ts;
+elseif Args.OldGrid
+  %get a 5 by 5 grid used by the old data
+  rows = 5;
+  cols = 5;
+  screen_width = obj.data.screen_size(1);
+  screen_height = obj.data.screen_size(2);
+  squareArea = floor((screen_height-screen_height/10)/rows);
+  xmargin = (screen_width - cols * squareArea) / 2;
+  ymargin = (screen_height - rows * squareArea) / 2;
+  xdiff = (screen_width-2*xmargin)/cols;
+  ydiff = (screen_height-2*ymargin)/rows;
+  r = struct('rows', rows, 'columns', cols, 'screen_width',screen_width,...
+             'screen_height',screen_height,'xmargin', xmargin,...
+             'ymargin', ymargin, 'xdiff', xdiff, 'ydiff', ydiff);
 else
 	% if we don't recognize and of the options, pass the call to parent
 	% in case it is to get number of events, which has to go all the way

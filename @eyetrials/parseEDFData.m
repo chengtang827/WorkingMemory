@@ -43,6 +43,21 @@ function sessions  = parseEDFData(obj,edfdata,triggers)
     skipped = [];
     nstarts = 0;
     nends = 0;
+    if isfield(triggers, 'trial_start')
+      trial_start_trigger = triggers.trial_start;
+    else
+      trial_start_trigger = '00000000';
+    end
+    if isfield(triggers, 'target_prefix')
+      target_prefix = triggers.target_prefix;
+    else
+      target_prefix = '101';
+    end
+    if isfield(triggers, 'distractor_prefix')
+      distractor_prefix = triggers.distractor_prefix;
+    else
+      distractor_prefix = '011';
+    end
     for nextevent=1:nevents
         if ~isempty(edfdata.FEVENT(nextevent).message)
           m = strrep(edfdata.FEVENT(nextevent).message, ' ', '');
@@ -51,7 +66,7 @@ function sessions  = parseEDFData(obj,edfdata,triggers)
               sessionnr = sessionnr + 1; %bin2dec(m(4:end));
               sessions(sessionnr).trials = struct;
               trialnr = 0; %reset the trial counter
-            elseif strcmp(m, '00000010') %trial start
+            elseif strcmp(m, trial_start_trigger) %trial start
               trialnr  = trialnr + 1;
               k = 1;
               trialstart = edfdata.FEVENT(nextevent).sttime;
@@ -65,7 +80,7 @@ function sessions  = parseEDFData(obj,edfdata,triggers)
                 skipped = [skipped nextevent];
                 continue; %don't add to a trial unless trial start was seen
               end
-              if strcmp(m(1:3), '101') %target
+              if strcmp(m(1:3), target_prefix) %target
                   %get the row and column index
                   if length(m) == 8
                       px = bin2dec(m(5:-1:3));
@@ -76,7 +91,7 @@ function sessions  = parseEDFData(obj,edfdata,triggers)
                   end
                   sessions(sessionnr).trials(trialnr).target = struct('row', py, 'column', px, 'onset', edfdata.FEVENT(nextevent).sttime);
 
-              elseif strcmp(m(1:3), '011')  %distractor
+              elseif strcmp(m(1:3), distractor_prefix)  %distractor
                   if length(m) == 8
                       px = bin2dec(m(5:-1:3));
                       py = bin2dec(m(8:-1:6));
@@ -151,6 +166,7 @@ function sessions  = parseEDFData(obj,edfdata,triggers)
                 end
             end
         end
+        pp = nextevent/nevents*100;
+        %fprintf(1, '\b%.2f', pp);
     end
-    save('edfdata.mat','edfdata');
 end

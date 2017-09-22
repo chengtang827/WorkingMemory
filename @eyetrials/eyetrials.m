@@ -77,19 +77,47 @@ if(dnum>0)
         load(dlist(1).name);
       else
         edfdata = edfmex(dlist(1).name);
+        if Args.SaveLevels > 0
+          save('edfdata.mat','edfdata', '-v7.3');
+        end
       end
-      triggers = {{'trial_start' '00000001'},...
-                  {'trial_end' '00100000'}};
+      if ~isempty(fieldnames(Args.triggers))
+        triggers = Args.triggers;
+      else
+        triggers = struct('trial_start','00000010',...
+                  'trial_end','00100000');
+      end
       trialdata = parseEDFData(eyetrials, edfdata, triggers);
-      data.trials = trialdata.trials;
+      if isfield(trialdata(1),'trials')
+        %multiple sessions in one structure
+        data.setIndex = [];
+        data.trials = struct;
+        data.numSets = length(trialdata);
+        k = 1;
+        for i = 1:length(trialdata) %iterate over sessions
+          for j = 1:length(trialdata(i).trials)
+            ff = fieldnames(trialdata(i).trials(j));
+            if ~isempty(ff)
+              for fi = 1:length(ff)
+                data.trials(k).(ff{fi}) = trialdata(i).trials(j).(ff{fi});
+              end
+              data.setIndex(k) = i;
+              k = k + 1;
+            end
+          end
+        end
+        ntrials = k;
+      else
+        data.trials = trialdata.trials;
+        ntrials = length(data.trials);
+        data.setIndex = ones(ntrials,1);
+      end
       %get the screen size
       screen_size_str = split(edfdata.FEVENT(1).message);
       data.screen_size = [str2double(screen_size_str{end-1}) str2double(screen_size_str{end})];
-      ntrials = length(data.trials);
       % create nptdata so we can inherit from it
       data.Args = Args;
       % set index to keep track of which data goes with which directory
-      data.setIndex = ones(ntrials,1);
       n = nptdata(data.numSets,0,pwd);
       d.data = data;
       obj = class(d,Args.classname,n);

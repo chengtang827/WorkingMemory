@@ -37,7 +37,7 @@ else
 		r = p;
 		% useful fields for most objects
 		r.data.numSets = p.data.numSets + q.data.numSets;
-		r.data.setIndex = [p.data.setIndex; q.data.setIndex + p.data.setIndex(end)];
+		r.data.setIndex = [p.data.setIndex q.data.setIndex + p.data.setIndex(end)];
 
 		% object specific fields
 		r.data.dlist = [p.data.dlist; q.data.dlist];

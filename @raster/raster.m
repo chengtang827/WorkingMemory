@@ -96,9 +96,6 @@ if ~isempty(tr) && exist('unit.mat')
         if isempty(t1)
             continue %invalid trials
         end
-        if isempty(tr.data.trials(t).reward)
-            continue
-        end
         tidx = find((timestamps > t0)&(timestamps < t1));
         spiketimes = [spiketimes;timestamps(tidx)-t0];
         trialidx = [trialidx;repmat(t, length(tidx),1)];

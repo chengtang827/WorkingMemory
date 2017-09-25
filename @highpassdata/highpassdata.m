@@ -13,10 +13,12 @@ function [obj, varargout] = highpassdata(varargin)
 %dependencies: plx_ad_v
 
 Args = struct('RedoLevels',0, 'SaveLevels',0, 'Auto',0, 'ArgsOnly',0,...
-							'Channel',1, 'low', 300, 'high', 10000 );
+							'Channel',1, 'low', 300, 'high', 10000, 'Data',[],...
+							'sampling_rate',0.0);
 Args.flags = {'Auto','ArgsOnly'};
 % The arguments which can be neglected during arguments checking
 Args.DataCheckArgs = {};
+
 
 [Args,modvarargin] = getOptArgs(varargin,Args, ...
 	'subtract',{'RedoLevels','SaveLevels'}, ...

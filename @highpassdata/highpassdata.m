@@ -58,36 +58,41 @@ dlist = nptDir;
 
 % check if the right conditions were met to create object
 pl2file = dir('*.pl2');
-if isempty(p2file)
+if isempty(pl2file) && isempty(Args.Data)
   obj = createEmptyObject(Args);
 else
-	%TODO: Make sure we adjust for the time stamps
-  [adfreq, n, ts, fn, ad] = plx_ad_v(pl2file.fname, Args.channel);
-	event_ts = [];
-	event_id = [];
-	for i = 1:8
-		[n,ts,sv] = plx_event_ts(fname, sprintf('EVT%.2d', i))
-		event_ts = [event_ts ts];
-		event_id = [event_id repmat(i, length(ts),1)];
-	end
-	%find sessions
-	session_starts = [];
-	for i = 1:length(event_ts)
-		if event_id(i,1:3) == [1 1 0]
-			session_starts = [session_starts event_ts(i)];
+	if isempty(Args.Data)
+		%TODO: Make sure we adjust for the timestamps
+	  [adfreq, n, ts, fn, ad] = plx_ad_v(pl2file.fname, Args.channel);
+		event_ts = [];
+		event_id = [];
+		for i = 1:8
+			[n,ts,sv] = plx_event_ts(fname, sprintf('EVT%.2d', i))
+			event_ts = [event_ts ts];
+			event_id = [event_id repmat(i, length(ts),1)];
 		end
+		%find sessions
+		session_starts = [];
+		for i = 1:length(event_ts)
+			if event_id(i,1:3) == [1 1 0]
+				session_starts = [session_starts event_ts(i)];
+			end
+		end
+	else
+		ad = Args.Data;
+		adfreq = Args.sampling_rate;
 	end
-  [b,a] = butter(4,[Args.low Args.high]);
+  [b,a] = butter(4,[Args.low/Args.sampling_rate Args.high/Args.sampling_rate]);
 	data.data = filtfilt(b,a,ad);
 	%break up the signal into sessions. A session is defined as a block
 	%of data starting with a 110000XX marker and continues either until the
 	%next such marker, or until the end of the file
 
-	data.channel = Args.channel;
+	data.channel = Args.Channel;
 	data.sampling_rate = adfreq;
 	data.freq_low = Args.low;
 	data.freq_high = Args.high;
-	data.filter = butterworth;
+	data.filter = 'butterworth';
 	data.order = 4;
 	% these are fields that are useful for most objects
 	data.numSets = 1;

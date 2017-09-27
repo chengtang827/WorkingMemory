@@ -28,6 +28,17 @@ if exist(filename)
                        cd ..
                    end
                    cd ..
+               else
+                   cell_spl2 = strsplit(cell_spl{3},'s');
+                   cd(sprintf('channel%03d',str2num(cell_spl{2})))
+                   if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
+                       mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
+                       cd(sprintf('cell%02d',str2num(cell_spl2{1})))
+                       timestamps = getfield(m,s{i_unit});
+                       save('unit.mat','timestamps');
+                       cd ..
+                   end
+                   cd ..
                end
                cd ..
            elseif str2num(cell_spl{2}) > 32 && str2num(cell_spl{2}) < 65
@@ -44,12 +55,34 @@ if exist(filename)
                        cd ..
                    end
                    cd ..
+               else
+                  cell_spl2 = strsplit(cell_spl{3},'s');
+                   cd(sprintf('channel%03d',str2num(cell_spl{2})-32))
+                   if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
+                       mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
+                       cd(sprintf('cell%02d',str2num(cell_spl2{1})))
+                       timestamps = getfield(m,s{i_unit});
+                       save('unit.mat','timestamps');
+                       cd ..
+                   end
+                   cd .. 
                end
                cd ..
            elseif str2num(cell_spl{2}) > 64 && str2num(cell_spl{2}) < 97
                cd('array03')
                if ~exist(sprintf('channel%03d',str2num(cell_spl{2})-64))
                    mkdir(sprintf('channel%03d',str2num(cell_spl{2})-64))
+                   cell_spl2 = strsplit(cell_spl{3},'s');
+                   cd(sprintf('channel%03d',str2num(cell_spl{2})-64))
+                   if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
+                       mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
+                       cd(sprintf('cell%02d',str2num(cell_spl2{1})))
+                       timestamps = getfield(m,s{i_unit});
+                       save('unit.mat','timestamps');
+                       cd ..
+                   end
+                   cd ..
+               else
                    cell_spl2 = strsplit(cell_spl{3},'s');
                    cd(sprintf('channel%03d',str2num(cell_spl{2})-64))
                    if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
@@ -76,6 +109,17 @@ if exist(filename)
                        cd ..
                    end
                    cd ..
+               else
+                  cell_spl2 = strsplit(cell_spl{3},'s');
+                   cd(sprintf('channel%03d',str2num(cell_spl{2})-96))
+                   if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
+                       mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
+                       cd(sprintf('cell%02d',str2num(cell_spl2{1})))
+                       timestamps = getfield(m,s{i_unit});
+                       save('unit.mat','timestamps');
+                       cd ..
+                   end
+                   cd .. 
                end
                cd ..
            end

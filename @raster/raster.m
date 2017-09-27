@@ -107,7 +107,9 @@ if ~isempty(tr) && exist('unit.mat')
     n = nptdata(data.numSets,0,pwd);
     d.data = data;
     obj = class(d,Args.classname,n);
+    
     saveObject(obj,'ArgsC',Args);
+    
     
     
 else

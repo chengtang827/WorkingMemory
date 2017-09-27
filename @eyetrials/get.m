@@ -40,6 +40,10 @@ elseif ~isempty(Args.Event)
         else
           tf = nan;
         end
+        tf = obj.data.trials(t).response_cue;
+        if isempty(tf)
+          tf = nan;
+        end
         i = 1;
         while (i < length(q)) && (q(i).onset < tf)
           i = i + 1;
@@ -52,7 +56,7 @@ elseif ~isempty(Args.Event)
           end
           response_saccade(t) = qq;
         else
-          i = i -1;
+          i = i;
           ts(t) = q(i).onset;
           response_saccade(t) = q(i);
         end %if i

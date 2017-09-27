@@ -4,9 +4,9 @@ function [obj, varargout] = plot(obj,varargin)
 %   response.
 
 Args = struct('LabelsOff',0,'GroupPlots',1,'GroupPlotIndex',1,'Color','b', ...
-		  'ReturnVars',{''}, 'ArgsOnly',0,'TrialLevel',0,'ReactionTime',0,...
+		  'ReturnVars',{''}, 'ArgsOnly',0,'TrialLevel',0,'ReactionTimePlot',0,...
 			'ResponseTimeHist',0,'ResponseSaccades',0);
-Args.flags = {'LabelsOff','ArgsOnly','TrialLevel','ReactionTime',...
+Args.flags = {'LabelsOff','ArgsOnly','TrialLevel','ReactionTimePlot',...
 							'ResponseTimeHist'};
 [Args,varargin2] = getOptArgs(varargin,Args);
 
@@ -90,7 +90,7 @@ if Args.TrialLevel
 		trialidx = tidx - sum(obj.data.setIndex < session_idx);
 	end
 	title([session_name 't' num2str(trialidx)])
-elseif Args.ReactionTime
+elseif Args.ReactionTimePlot
 	cwd = pwd;
 	cd(session_dir);
 	%get experimental results

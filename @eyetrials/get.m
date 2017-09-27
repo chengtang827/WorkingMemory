@@ -10,8 +10,8 @@ function [r,varargout] = get(obj,varargin)
 %   Dependencies:
 
 Args = struct('ObjectLevel',0, 'AnalysisLevel',0, 'TrialLevel',0,...
- 							'EventTiming','','Event','','OldGrid',0);
-Args.flags ={'ObjectLevel','AnalysisLevel','OldGrid'};
+ 							'EventTiming','','Event','','OldGrid',0, 'ReactionTime',0);
+Args.flags ={'ObjectLevel','AnalysisLevel','OldGrid','ReactionTime'};
 Args = getOptArgs(varargin,Args);
 
 % set variables to default
@@ -90,6 +90,11 @@ elseif ~isempty(Args.EventTiming)
     end %if strcmpi(Args.EventTiming, 'saccade')
   end %if isfield(obj.data.trials(1),Args.EventTiming)
   r = ts;
+elseif Args.ReactionTime
+  % get time difference
+  cue_time = get(obj, 'EventTiming','response_cue');
+  saccade_time = get(obj, 'EventTiming', 'saccade');
+  r = saccade_time - cue_time;
 elseif Args.OldGrid
   %get a 5 by 5 grid used by the old data
   rows = 5;

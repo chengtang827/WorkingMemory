@@ -117,6 +117,7 @@ elseif(~isempty(Args.AlignmentEvent) && ~isempty(Args.TimeInterval) && ~isempty(
         else
             et = eyetrials('auto');
         end
+        cd(cwd);
         saccade_time = get(et, 'EventTiming', 'saccade');
         start_time = get(et, 'EventTiming', 'start');
         event_onset = (saccade_time -  start_time)/1000; % convert to seconds

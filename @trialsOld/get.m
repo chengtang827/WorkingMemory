@@ -9,7 +9,7 @@ function [r,varargout] = get(obj,varargin)
 %
 %   Dependencies: 
 
-Args = struct('ObjectLevel',0, 'AnalysisLevel',0, 'TargetOnset',0);
+Args = struct('ObjectLevel',0, 'AnalysisLevel',0, 'TargetOnset',0,'EventTiming','');
 Args.flags ={'ObjectLevel','AnalysisLevel','TargetOnset'};
 Args = getOptArgs(varargin,Args);
 
@@ -30,6 +30,30 @@ elseif Args.TargetOnset
         end
     end
     r = target_onset;
+elseif ~isempty(Args.EventTiming)
+  ts = nan(length(obj.data.trials),1);
+  if strcmpi(Args.EventTiming,'distractor')
+    for t = 1:length(obj.data.trials)
+      if ~isempty(obj.data.trials(t).distractors)
+          ts(t) = obj.data.trials(t).distractors(1);
+      end
+  end
+  elseif isfield(obj.data.trials(1),Args.EventTiming)
+    if isstruct(obj.data.trials(1).(Args.EventTiming))
+        for t = 1:length(obj.data.trials)
+          if ~isempty(obj.data.trials(t).(Args.EventTiming))
+            ts(t) = obj.data.trials(t).(Args.EventTiming).timestamp;
+          end
+        end
+    else
+        for t = 1:length(obj.data.trials)
+          if ~isempty(obj.data.trials(t).(Args.EventTiming))
+            ts(t) = obj.data.trials(t).(Args.EventTiming);
+          end
+        end
+    end
+  end
+  r = ts;
 else
 	% if we don't recognize and of the options, pass the call to parent
 	% in case it is to get number of events, which has to go all the way

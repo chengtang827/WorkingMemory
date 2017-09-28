@@ -69,18 +69,22 @@ if ~isempty(raster)
 	% these are object specific fields
     saccade_raster = get(rr, 'saccade', 'Window', Args.Window);
     ntrials = maximum(saccade_raster.data.trialidx);
+    ff = zeros(100,ntrials);
+    bw = zeros(ntrials,1);
     for t = 1:ntrials
         tidx = find(saccade_raster.data.trialidx==t);
         timestamps = saccade_raster.data.timestamps(tidx);
         %find latency by computing spike density
-        [f,xi] = ksdensity(timestamps);
+        [ff(:,t),xi, bw(t)] = ksdensity(timestamps);
     end
 	data.dlist = dlist;
 	% set index to keep track of which data goes with which directory
 	data.setIndex = [0; dnum];
 	
 	% create nptdata so we can inherit from it
-    
+    data.density = ff; 
+    data.bandwidth = bw;
+    data.xi = xi;
     data.Args = Args;
 	n = nptdata(data.numSets,0,pwd);
 	d.data = data;

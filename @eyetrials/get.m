@@ -67,8 +67,8 @@ elseif ~isempty(Args.Event)
 elseif ~isempty(Args.EventTiming)
   ts = nan(length(obj.data.trials),1);
   if isfield(obj.data.trials(1),Args.EventTiming)
-		if strcmpi(Args.EventTiming,'saccade')
-			%find the saccade immediately preceeding either reward or failure
+    if strcmpi(Args.EventTiming,'saccade')
+	%find the saccade immediately preceeding either reward or failure
       response_saccade = get(obj,'Event','response_saccade');
       for t = 1:length(obj.data.trials)
         if ~isempty(response_saccade(t).onset)

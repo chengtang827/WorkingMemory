@@ -131,7 +131,7 @@ elseif(~isempty(Args.AlignmentEvent) && ~isempty(Args.TimeInterval) && ~isempty(
     t0 = time_onset(obj.data.trialidx);
     t1 = time_offset(obj.data.trialidx);
     spidx = (obj.data.spiketimes >= t0)&(obj.data.spiketimes < t1);
-    sptimes = obj.data.spiketimes(spidx) - time_onset(obj.data.trialidx(spidx));
+    sptimes = obj.data.spiketimes(spidx) - event_onset(obj.data.trialidx(spidx));
     tIdx = obj.data.trialidx(spidx);
     setIdx = obj.data.setIndex(spidx);
     df = obj;

@@ -9,7 +9,7 @@ function [r,varargout] = get(obj,varargin)
 %
 %   Dependencies:
 
-Args = struct('ObjectLevel',0, 'AnalysisLevel',0,'TrialType','','AlignmentEvent','','TimeInterval',[],'TrialObj',[]);
+Args = struct('ObjectLevel',0, 'AnalysisLevel',0,'TrialType','','AlignmentEvent','','TimeInterval',[],'TrialObj',[], 'EyeTrialObj', []);
 Args.flags ={'ObjectLevel','AnalysisLevel'};
 Args = getOptArgs(varargin,Args);
 
@@ -76,6 +76,17 @@ elseif(~isempty(Args.TrialType) && isempty(Args.AlignmentEvent) && isempty(Args.
         r = df;
     end
 elseif(~isempty(Args.AlignmentEvent) && ~isempty(Args.TimeInterval) && ~isempty(Args.TrialType))
+    if isempty(Args.TrialObj)
+        session_dir = getDataOrder('session');
+        cwd = pwd;
+        cd(session_dir)
+        if ~isempty(strfind(session_dir,'Pancake')) || ~isempty(strfind(session_dir,'James'))
+            Args.TrialObj = trialsOld('auto');
+        else
+            Args.TrialObj = trials('auto');
+        end
+        cd(cwd);
+    end
     tr = Args.TrialObj;
     ind = zeros(length(tr.data.trials),1);
     tic;
@@ -97,9 +108,23 @@ elseif(~isempty(Args.AlignmentEvent) && ~isempty(Args.TimeInterval) && ~isempty(
     toc
     ind = find(ind);
     bins = Args.TimeInterval;sptimes=[];tIdx=[];setIdx=[];
-    event_onset = get(tr, 'EventTiming', Args.AlignmentEvent);
-    time_onset = event_onset - bins(1);
-    time_offset = event_onset + bins(1);
+    if strcmpi(Args.AlignmentEvent,'saccade')
+        session_dir = getDataOrder('session');
+        cwd = pwd;
+        cd(session_dir)
+        if ~isempty(strfind(session_dir,'Pancake')) || ~isempty(strfind(session_dir,'James'))
+            et = eyetrials('auto','triggers',struct('trial_start','00000000','target_prefix', '010', 'distractor_prefix','100'));
+        else
+            et = eyetrials('auto');
+        end
+        saccade_time = get(et, 'EventTiming', 'saccade');
+        start_time = get(et, 'EventTiming', 'start');
+        event_onset = (saccade_time -  start_time)/1000; % convert to seconds
+    else
+        event_onset = get(tr, 'EventTiming', Args.AlignmentEvent);
+    end
+    time_onset = event_onset + bins(1);
+    time_offset = event_onset + bins(2);
     spidx = logical(zeros(length(obj.data.spiketimes),1));
     tr_idx = ismember(obj.data.trialidx, ind);
     tic; 

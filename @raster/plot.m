@@ -92,5 +92,6 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 RR = eval('Args.ReturnVars');
+RR1 = {};
 for i=1:length(RR) RR1{i}=eval(RR{i}); end
 varargout = getReturnVal(Args.ReturnVars, RR1);

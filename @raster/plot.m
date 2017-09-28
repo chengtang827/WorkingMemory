@@ -37,7 +37,7 @@ if ~strcmpi(Args.Alignment,'start') || ~isempty(Args.Sortby)
         %load the trial structure to get the new alignment
         %get the session directory for the request plot
         dd = nptdata(obj);
-        session_dir = getDataDirNew('session');
+        session_dir = getDataOrder('session');
         %,'DirString', dd.SessionDirs{n});
         cwd = pwd;
         cd(session_dir);
@@ -50,7 +50,7 @@ if ~strcmpi(Args.Alignment,'start') || ~isempty(Args.Sortby)
         cd(cwd);
         if ~strcmpi(Args.Alignment, 'start')
             if ~isfield(tr.data.trials(1),Args.Alignment)
-                warn('Invalid alignemnt request')
+                warning('Invalid alignemnt request')
             end
             obj2 = get(obj,'TrialType',Args.Trial,'AlignmentEvent',Args.Alignment,'TimeInterval',Args.Bins,'TrialObj',tr);
             % 			for t = 1:length(tr.data.trials)

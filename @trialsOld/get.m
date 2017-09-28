@@ -9,8 +9,8 @@ function [r,varargout] = get(obj,varargin)
 %
 %   Dependencies: 
 
-Args = struct('ObjectLevel',0, 'AnalysisLevel',0);
-Args.flags ={'ObjectLevel','AnalysisLevel'};
+Args = struct('ObjectLevel',0, 'AnalysisLevel',0, 'TargetOnset',0);
+Args.flags ={'ObjectLevel','AnalysisLevel','TargetOnset'};
 Args = getOptArgs(varargin,Args);
 
 % set variables to default
@@ -22,6 +22,14 @@ if(Args.ObjectLevel)
 elseif(Args.AnalysisLevel)
 	% specifies that the AnalysisLevel of the object is 'AllIntragroup'
 	r = 'Single';
+elseif Args.TargetOnset
+    target_onset = nan(length(obj.data.trials),1);
+    for i = 1:length(target_onset)
+        if ~isempty(obj.data.trials(i).target)
+            target_onset(i) = obj.data.trials(i).target.timestamp;
+        end
+    end
+    r = target_onset;
 else
 	% if we don't recognize and of the options, pass the call to parent
 	% in case it is to get number of events, which has to go all the way

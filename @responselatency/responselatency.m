@@ -13,7 +13,7 @@ function [obj, varargout] = responselatency(varargin)
 %dependencies: 
 
 Args = struct('RedoLevels',0, 'SaveLevels',0, 'Auto',0, 'ArgsOnly',0,...
-             'Reference','PreSaccade', 'Window', [-300.0 0]);
+             'Reference','PreSaccade', 'TimeInterval', [-0.3 0.1]);
 Args.flags = {'Auto','ArgsOnly'};
 % Specify which arguments should be checked when comparing saved objects
 % to objects that are being asked for. Only arguments that affect the data
@@ -60,26 +60,29 @@ dnum = size(dlist,1);
 rr = raster('auto');
 
 % check if the right conditions were met to create object
-if ~isempty(raster)
+if ~isempty(rr)
 	% this is a valid object
 	% these are fields that are useful for most objects
-	data.numSets = 1;
     data.Args = Args;
 	
 	% these are object specific fields
-    saccade_raster = get(rr, 'saccade', 'Window', Args.Window);
-    ntrials = maximum(saccade_raster.data.trialidx);
+    saccade_raster = get(rr, 'AlignmentEvent', 'saccade', 'TimeInterval', Args.TimeInterval,...
+                         'TrialType','correct');
+    ntrials = max(saccade_raster.data.trialidx);
+	data.numSets = 1;
     ff = zeros(100,ntrials);
     bw = zeros(ntrials,1);
     for t = 1:ntrials
         tidx = find(saccade_raster.data.trialidx==t);
-        timestamps = saccade_raster.data.timestamps(tidx);
-        %find latency by computing spike density
-        [ff(:,t),xi, bw(t)] = ksdensity(timestamps);
+        if ~isempty(tidx)
+            timestamps = saccade_raster.data.spiketimes(tidx);
+            %find latency by computing spike density
+            [ff(:,t),xi, bw(t)] = ksdensity(timestamps);
+        end
     end
 	data.dlist = dlist;
 	% set index to keep track of which data goes with which directory
-	data.setIndex = [0; dnum];
+	data.setIndex = ones(1, ntrials);
 	
 	% create nptdata so we can inherit from it
     data.density = ff; 

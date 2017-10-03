@@ -49,37 +49,14 @@ if ~strcmpi(Args.Alignment,'start') || ~isempty(Args.Sortby)
         end
         cd(cwd);
         if ~strcmpi(Args.Alignment, 'start')
-            if ~isfield(tr.data.trials(1),Args.Alignment)
-                warning('Invalid alignemnt request')
-            end
-            obj2 = get(obj,'TrialType',Args.Trial,'AlignmentEvent',Args.Alignment,'TimeInterval',Args.Bins,'TrialObj',tr);
+            obj2 = get(obj,'TrialType',Args.Trial,'AlignmentEvent',Args.Alignment,'TimeInterval',Args.Bins,'TrialObj',....
+                      tr,'SortingEvent', Args.Sortby);
             % 			for t = 1:length(tr.data.trials)
             % 				idx = obj.data.trialidx==t;
             % 			end
             idcx = find(obj2.data.setIndex==n);
             spiketimes = obj2.data.spiketimes(idcx);
             trialidx = obj2.data.trialidx(idcx);
-        end
-        if ~isempty(Args.Sortby)
-            if strcmpi(Args.Sortby, 'saccade')
-                ts = get(et, 'EventTiming','saccade');
-                t0 = get(et, 'EventTiming','start');
-                sortby = double(ts-t0)/1000;
-                sortby(sortby < 0.0) = 0.0;
-            elseif ~isfield(tr.data.trials(1), Args.Sortby)
-                warning('Invalid sorting request')
-            else
-                sortby = get(tr, 'EventTiming',Args.Sortby);
-            end
-            [ss,qidx] = sort(sortby);
-            otrialidx = obj.data.trialidx(sidx);
-            for t = 1:length(ss)
-                idx = otrialidx==qidx(t); %find the trials with index sidx(t)
-                trialidx(idx) = t;
-            end
-            cla
-            plot(ss, 1:length(ss), '.k')
-            hold on
         end
     end
 end

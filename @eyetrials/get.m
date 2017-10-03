@@ -40,7 +40,12 @@ elseif ~isempty(Args.Event)
         else
           tf = nan;
         end
-        tf = obj.data.trials(t).response_cue;
+        if isfield(obj.data.trials(t),'left_fixation')
+          tf = obj.data.trials(t).left_fixation;
+        end
+        if all(isnan(tf)) || isempty(tf)
+          tf = obj.data.trials(t).response_cue;
+        end
         if isempty(tf)
           tf = nan;
         end
@@ -60,6 +65,11 @@ elseif ~isempty(Args.Event)
           ts(t) = q(i).onset;
           response_saccade(t) = q(i);
         end %if i
+      else
+        fn = fieldnames(response_saccade(1));
+        for ffi = 1:length(fn)
+          response_saccade(t).(fn{ffi}) = nan;
+        end
       end %if ~isempty
     end %for t
     r = response_saccade;

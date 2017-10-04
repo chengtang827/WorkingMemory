@@ -30,7 +30,7 @@ else
         % so return p
         r = p;
 	else
-		% both p and q are the right kind of objects so add them 
+		% both p and q are the right kind of objects so add them
 		% together
 		% assign p to r so that we can be sure we are returning the right
 		% object
@@ -38,7 +38,7 @@ else
 		% useful fields for most objects
 		r.data.numSets = p.data.numSets + q.data.numSets;
 
-		
+
 		% object specific fields
 		r.data.dlist = [p.data.dlist; q.data.dlist];
 		if ~isempty(p.data.setIndex)
@@ -47,11 +47,12 @@ else
 			toffset = 0;
 		end
 		r.data.setIndex = [p.data.setIndex q.data.setIndex + toffset];
-        r.data.xi = [p.data.xi; q.data.xi]; 
-        r.data.density = [p.data.density q.data.density];
-        r.data.bandwith = [p.data.bandwidth; q.data.bandwidth];
+    r.data.xi = [p.data.xi; q.data.xi];
+    r.data.density = [p.data.density q.data.density];
+    r.data.bandwith = [p.data.bandwidth; q.data.bandwidth];
+		r.data.counts = [p.data.counts q.data.counts];
+		r.data.trialidx = [p.data.trialidx; q.data.trialidx];
 
-			
 		% add nptdata objects as well
 		r.nptdata = plus(p.nptdata,q.nptdata);
 	end

@@ -3,22 +3,23 @@ function [obj, varargout] = responselatency(varargin)
 %   OBJ = responselatency(varargin)
 %
 %   OBJ = responselatency('auto') attempts to create a DIRFILES object by ...
-%   
+%
 %   %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   % Instructions on responselatency %
 %   %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %example [as, Args] = responselatency('save','redo')
 %
-%dependencies: 
+%dependencies:
 
 Args = struct('RedoLevels',0, 'SaveLevels',0, 'Auto',0, 'ArgsOnly',0,...
-             'Reference','PreSaccade', 'TimeInterval', [-0.3 0.1]);
+             'Reference','PreSaccade', 'AnalysisWindow', [-0.2 0.1],...
+             'BaselineWindow',[-0.3, -0.2], 'Bandwidth',0.0);
 Args.flags = {'Auto','ArgsOnly'};
 % Specify which arguments should be checked when comparing saved objects
 % to objects that are being asked for. Only arguments that affect the data
 % saved in objects should be listed here.
-Args.DataCheckArgs = {};                            
+Args.DataCheckArgs = {};
 
 [Args,modvarargin] = getOptArgs(varargin,Args, ...
 	'subtract',{'RedoLevels','SaveLevels'}, ...
@@ -45,7 +46,7 @@ elseif(strcmp(command,'loadObj'))
     l = load(Args.matname);
     obj = eval(['l.' Args.matvarname]);
 elseif(strcmp(command,'createObj'))
-    % IMPORTANT NOTICE!!! 
+    % IMPORTANT NOTICE!!!
     % If there is additional requirements for creating the object, add
     % whatever needed here
     obj = createObject(Args,varargin{:});
@@ -64,31 +65,45 @@ if ~isempty(rr)
 	% this is a valid object
 	% these are fields that are useful for most objects
     data.Args = Args;
-	
+
 	% these are object specific fields
-    saccade_raster = get(rr, 'AlignmentEvent', 'saccade', 'TimeInterval', Args.TimeInterval,...
+    window = [Args.BaselineWindow(1) Args.AnalysisWindow(2)];
+    saccade_raster = get(rr, 'AlignmentEvent', 'saccade', 'TimeInterval', window,...
                          'TrialType','correct');
-    ntrials = max(saccade_raster.data.trialidx);
-	data.numSets = 1;
-    ff = zeros(100,ntrials);
+    trialidx = unique(saccade_raster.data.trialidx);
+    ntrials = length(trialidx);
+    data.numSets = 1;
     bw = zeros(ntrials,1);
+    bins = window(1):0.001:window(2);
+    ff = zeros(length(bins),ntrials);
+    counts = zeros(length(bins)-1,ntrials);
     for t = 1:ntrials
         tidx = find(saccade_raster.data.trialidx==t);
         if ~isempty(tidx)
             timestamps = saccade_raster.data.spiketimes(tidx);
             %find latency by computing spike density
-            [ff(:,t),xi, bw(t)] = ksdensity(timestamps);
+            if Args.Bandwidth == 0
+              [ff(:,t),xi, bw(t)] = ksdensity(timestamps,bins);
+            else
+              [ff(:,t),xi] = ksdensity(timestamps,bins,'Bandwidth',Args.Bandwidth);
+              bw(t) = Args.Bandwidth;
+            end
+            counts(:,t) = histcounts(timestamps, bins);
         end
     end
+
 	data.dlist = dlist;
 	% set index to keep track of which data goes with which directory
 	data.setIndex = ones(1, ntrials);
-	
+
 	% create nptdata so we can inherit from it
-    data.density = ff; 
+    data.density = ff;
+    data.counts = counts;
+    data.bins = bins;
     data.bandwidth = bw;
     data.xi = xi;
     data.Args = Args;
+    data.trialidx = trialidx;
 	n = nptdata(data.numSets,0,pwd);
 	d.data = data;
 	obj = class(d,Args.classname,n);

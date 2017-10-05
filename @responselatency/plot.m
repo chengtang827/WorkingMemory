@@ -37,6 +37,9 @@ if length(tidx) == 1
 		plot(obj.data.xi(idx),obj.data.density(idx,tidx),'.')
 		hold off
 else
+	nd = nptdata(obj);
+	celldir = nd.SessionDirs{n};
+	cellname = getDataOrder('ShortName','DirString',celldir);
 	if ~isempty(Args.ReactionTime)
 		gidx = intersect(find(~isnan(Args.ReactionTime)),obj.data.trialidx(tidx));
 		qidx = find(ismember(obj.data.trialidx(tidx), gidx));
@@ -78,6 +81,7 @@ else
 		plot(obj.data.xi(n,1:end-1), mup,'linewidth',2.0,'color',l1.Color);
 
 		legend([l1,l2], {'Upper','Lower'});
+		title(cellname);
 
 	else
     %use only trials with non-zeros density

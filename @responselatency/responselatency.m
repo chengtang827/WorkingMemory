@@ -75,6 +75,7 @@ if ~isempty(rr)
     data.numSets = 1;
     bw = zeros(ntrials,1);
     bins = window(1):0.001:window(2);
+    xi = window(1):0.001:window(2);
     ff = zeros(length(bins),ntrials);
     counts = zeros(length(bins)-1,ntrials);
     for t = 1:ntrials

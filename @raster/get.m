@@ -9,7 +9,7 @@ function [r,varargout] = get(obj,varargin)
 %
 %   Dependencies:
 
-Args = struct('ObjectLevel',0, 'AnalysisLevel',0,'TrialType','','AlignmentEvent','','TimeInterval',[],'TrialObj',[]);
+Args = struct('ObjectLevel',0, 'AnalysisLevel',0,'TrialType','','AlignmentEvent','','TimeInterval',[]);
 Args.flags ={'ObjectLevel','AnalysisLevel'};
 Args = getOptArgs(varargin,Args);
 
@@ -25,9 +25,9 @@ elseif (Args.AnalysisLevel)
 elseif(~isempty(Args.TrialType) && isempty(Args.AlignmentEvent) && isempty(Args.TimeInterval))
     if strcmpi(Args.TrialType,'Correct')
         ind = [];
-        tr = Args.TrialObj;
-        for i = 1:length(tr.data.trials)
-            if tr.data.trials(i).reward
+        tr = obj.data.trialobj;
+        for i = 1:length(tr)
+            if tr(i).reward
                 ind = [ind i];
             end
         end
@@ -39,12 +39,13 @@ elseif(~isempty(Args.TrialType) && isempty(Args.AlignmentEvent) && isempty(Args.
         df.data.trialidx = obj.data.trialidx(tr_ind);
         df.data.spiketimes = obj.data.spiketimes(tr_ind);
         df.data.setIndex = obj.data.setIndex(tr_ind);
+        df.data.trialobj = obj.data.trialobj(ind);
         r = df;
     elseif strcmpi(Args.TrialType,'Error') || strcmpi(Args.TrialType,'error')
         ind = [];
-       tr = Args.TrialObj;
-        for i = 1:length(tr.data.trials)
-            if tr.data.trials(i).failure && tr.data.trials(i).response
+       tr = obj.data.trialobj;
+        for i = 1:length(tr)
+            if tr(i).failure && tr(i).response
                 ind = [ind i];
             end
         end
@@ -56,12 +57,13 @@ elseif(~isempty(Args.TrialType) && isempty(Args.AlignmentEvent) && isempty(Args.
         df.data.trialidx = obj.data.trialidx(tr_ind);
         df.data.spiketimes = obj.data.spiketimes(tr_ind);
         df.data.setIndex = obj.data.setIndex(tr_ind);
+        df.data.trialobj = df.data.trialobj(ind);
         r = df;
     elseif strcmpi(Args.TrialType,'Aborted') || strcmpi(Args.TrialType,'aborted')
         ind = [];
-        tr = Args.TrialObj;
-        for i = 1:length(tr.data.trials)
-            if tr.data.trials(i).failure && ~tr.data.trials(i).response
+        tr = obj.data.trialobj;
+        for i = 1:length(tr)
+            if tr(i).failure && ~tr(i).response
                 ind = [ind i];
             end
         end
@@ -73,22 +75,23 @@ elseif(~isempty(Args.TrialType) && isempty(Args.AlignmentEvent) && isempty(Args.
         df.data.trialidx = obj.data.trialidx(tr_ind);
         df.data.spiketimes = obj.data.spiketimes(tr_ind);
         df.data.setIndex = obj.data.setIndex(tr_ind);
+        df.data.trialobj = obj.data.trialobj(ind);
         r = df;
     end
 elseif(~isempty(Args.AlignmentEvent) && ~isempty(Args.TimeInterval) && ~isempty(Args.TrialType))
     ind = [];
-    tr = Args.TrialObj;
-    for i = 1:length(tr.data.trials)
+    tr = obj.data.trialobj;
+    for i = 1:length(tr)
         if strcmpi(Args.TrialType,'correct')
-            if tr.data.trials(i).reward
+            if tr(i).reward
                 ind = [ind i];
             end
         elseif strcmpi(Args.TrialType,'error')
-            if tr.data.trials(i).failure && tr.data.trials(i).response
+            if tr(i).failure && tr(i).response
                 ind = [ind i];
             end
         elseif strcmpi(Args.TrialType,'aborted')
-            if tr.data.trials(i).failure && ~tr.data.trials(i).response
+            if tr(i).failure && ~tr(i).response
                 ind = [ind i];
             end
         end
@@ -97,11 +100,11 @@ elseif(~isempty(Args.AlignmentEvent) && ~isempty(Args.TimeInterval) && ~isempty(
     for j = 1:length(ind)
         if strcmpi(Args.AlignmentEvent,'target')
             if ~isempty(strmatch('Pancake',strsplit(pwd,'/'))) || ~isempty(strmatch('James',strsplit(pwd,'/')))
-                time_onset = tr.data.trials(ind(j)).target.timestamp - bins(1);
-                time_offset = tr.data.trials(ind(j)).target.timestamp + bins(2);
+                time_onset = tr(ind(j)).target.timestamp - bins(1);
+                time_offset = tr(ind(j)).target.timestamp + bins(2);
             else
-                time_onset = tr.data.trials(ind(j)).target.onset - bins(1);
-                time_offset = tr.data.trials(ind(j)).target.onset + bins(2);
+                time_onset = tr(ind(j)).target.onset - bins(1);
+                time_offset = tr(ind(j)).target.onset + bins(2);
             end
             tr_ind = find(obj.data.trialidx==ind(j) & (obj.data.spiketimes>time_onset & obj.data.spiketimes < time_offset));
             sptimes = [sptimes; obj.data.spiketimes(tr_ind) - (time_onset+bins(1))];
@@ -109,11 +112,11 @@ elseif(~isempty(Args.AlignmentEvent) && ~isempty(Args.TimeInterval) && ~isempty(
             setIdx = [setIdx; obj.data.setIndex(tr_ind)];
         elseif strcmpi(Args.AlignmentEvent,'distractor')
             if ~isempty(strmatch('Pancake',strsplit(pwd,'/'))) || ~isempty(strmatch('James',strsplit(pwd,'/')))
-                time_onset = tr.data.trials(ind(j)).distractors(1) - bins(1);
-                time_offset = tr.data.trials(ind(j)).distractors(1) + bins(2);
+                time_onset = tr(ind(j)).distractors(1) - bins(1);
+                time_offset = tr(ind(j)).distractors(1) + bins(2);
             else
-                time_onset = tr.data.trials(ind(j)).distractor.onset - bins(1);
-                time_offset = tr.data.trials(ind(j)).distractor.onset + bins(2);
+                time_onset = tr(ind(j)).distractor.onset - bins(1);
+                time_offset = tr(ind(j)).distractor.onset + bins(2);
             end
             tr_ind = find(obj.data.trialidx==ind(j) & (obj.data.spiketimes>time_onset & obj.data.spiketimes < time_offset));
             sptimes = [sptimes; obj.data.spiketimes(tr_ind) - (time_onset+bins(1))];
@@ -121,11 +124,11 @@ elseif(~isempty(Args.AlignmentEvent) && ~isempty(Args.TimeInterval) && ~isempty(
             setIdx = [setIdx; obj.data.setIndex(tr_ind)];
         elseif strcmpi(Args.AlignmentEvent,'saccade')
             if ~isempty(strmatch('Pancake',strsplit(pwd,'/'))) || ~isempty(strmatch('James',strsplit(pwd,'/')))
-                time_onset = tr.data.trials(ind(j)).saccade.timestamp - bins(1);
-                time_offset = tr.data.trials(ind(j)).saccade.timestamp + bins(2);
+                time_onset = tr(ind(j)).saccade.timestamp - bins(1);
+                time_offset = tr(ind(j)).saccade.timestamp + bins(2);
             else
-                time_onset = tr.data.trials(ind(j)).saccade.onset - bins(1);
-                time_offset = tr.data.trials(ind(j)).saccade.onset + bins(2);
+                time_onset = tr(ind(j)).saccade.onset - bins(1);
+                time_offset = tr(ind(j)).saccade.onset + bins(2);
             end
             tr_ind = find(obj.data.trialidx==ind(j) & (obj.data.spiketimes>time_onset & obj.data.spiketimes < time_offset));
             sptimes = [sptimes; obj.data.spiketimes(tr_ind) - (time_onset+bins(1))];
@@ -137,6 +140,7 @@ elseif(~isempty(Args.AlignmentEvent) && ~isempty(Args.TimeInterval) && ~isempty(
     df.data.trialidx = tIdx;
     df.data.spiketimes = sptimes;
     df.data.setIndex = setIdx;
+    df.data.trialobj = obj.data.trialobj(ind);
     r = df;
 else
     % if we don't recognize and of the options, pass the call to parent

@@ -9,12 +9,13 @@ if exist(filename)
         m = load(filename);
         s = fieldnames(m);
         cd(a.name)
-        for i_array = 1:4
+        for i_array = 1:8
             mkdir(sprintf('array%02d',i_array));
         end
         for i_unit = 1:length(s)
             cell_spl = strsplit(s{i_unit},{'g','c'});
-            if str2num(cell_spl{2}) < 33
+%             if  strcmpi(cell_spl{1},'vFEF_')
+                if str2num(cell_spl{2}) < 33 
                 cd('array01')
                 if ~exist(sprintf('channel%03d',str2num(cell_spl{2})))
                     mkdir(sprintf('channel%03d',str2num(cell_spl{2})))
@@ -41,12 +42,13 @@ if exist(filename)
                     cd ..
                 end
                 cd ..
-            elseif str2num(cell_spl{2}) > 32 && str2num(cell_spl{2}) < 65
+%             elseif  strcmpi(cell_spl{1},'dFEF_')
+                elseif (str2num(cell_spl{2}) > 32 && str2num(cell_spl{2}) < 65) 
                 cd('array02')
-                if ~exist(sprintf('channel%03d',str2num(cell_spl{2})-32))
-                    mkdir(sprintf('channel%03d',str2num(cell_spl{2})-32))
+                if ~exist(sprintf('channel%03d',str2num(cell_spl{2}) - 32))
+                    mkdir(sprintf('channel%03d',str2num(cell_spl{2}) - 32))
                     cell_spl2 = strsplit(cell_spl{3},'s');
-                    cd(sprintf('channel%03d',str2num(cell_spl{2})-32))
+                    cd(sprintf('channel%03d',str2num(cell_spl{2}) - 32))
                     if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
                         mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
                         cd(sprintf('cell%02d',str2num(cell_spl2{1})))
@@ -57,7 +59,7 @@ if exist(filename)
                     cd ..
                 else
                     cell_spl2 = strsplit(cell_spl{3},'s');
-                    cd(sprintf('channel%03d',str2num(cell_spl{2})-32))
+                    cd(sprintf('channel%03d',str2num(cell_spl{2}) - 32))
                     if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
                         mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
                         cd(sprintf('cell%02d',str2num(cell_spl2{1})))
@@ -68,12 +70,13 @@ if exist(filename)
                     cd ..
                 end
                 cd ..
-            elseif str2num(cell_spl{2}) > 64 && str2num(cell_spl{2}) < 97
+            elseif  strcmpi(cell_spl{1},'vArea46_')
+                %(str2num(cell_spl{2}) > 64 && str2num(cell_spl{2}) < 97) ||
                 cd('array03')
-                if ~exist(sprintf('channel%03d',str2num(cell_spl{2})-64))
-                    mkdir(sprintf('channel%03d',str2num(cell_spl{2})-64))
+                if ~exist(sprintf('channel%03d',str2num(cell_spl{2}) - 64))
+                    mkdir(sprintf('channel%03d',str2num(cell_spl{2}) - 64))
                     cell_spl2 = strsplit(cell_spl{3},'s');
-                    cd(sprintf('channel%03d',str2num(cell_spl{2})-64))
+                    cd(sprintf('channel%03d',str2num(cell_spl{2}) - 64))
                     if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
                         mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
                         cd(sprintf('cell%02d',str2num(cell_spl2{1})))
@@ -84,7 +87,7 @@ if exist(filename)
                     cd ..
                 else
                     cell_spl2 = strsplit(cell_spl{3},'s');
-                    cd(sprintf('channel%03d',str2num(cell_spl{2})-64))
+                    cd(sprintf('channel%03d',str2num(cell_spl{2}) - 64))
                     if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
                         mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
                         cd(sprintf('cell%02d',str2num(cell_spl2{1})))
@@ -95,12 +98,13 @@ if exist(filename)
                     cd ..
                 end
                 cd ..
-            elseif str2num(cell_spl{2}) > 96 && str2num(cell_spl{2}) < 129
+%             elseif  strcmpi(cell_spl{1},'dDLPFC_')
+                elseif (str2num(cell_spl{2}) > 96 && str2num(cell_spl{2}) < 129)
                 cd('array04')
-                if ~exist(sprintf('channel%03d',str2num(cell_spl{2})-96))
-                    mkdir(sprintf('channel%03d',str2num(cell_spl{2})-96))
+                if ~exist(sprintf('channel%03d',str2num(cell_spl{2}) - 96))
+                    mkdir(sprintf('channel%03d',str2num(cell_spl{2}) - 96))
                     cell_spl2 = strsplit(cell_spl{3},'s');
-                    cd(sprintf('channel%03d',str2num(cell_spl{2})-96))
+                    cd(sprintf('channel%03d',str2num(cell_spl{2}) - 96))
                     if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
                         mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
                         cd(sprintf('cell%02d',str2num(cell_spl2{1})))
@@ -111,7 +115,7 @@ if exist(filename)
                     cd ..
                 else
                     cell_spl2 = strsplit(cell_spl{3},'s');
-                    cd(sprintf('channel%03d',str2num(cell_spl{2})-96))
+                    cd(sprintf('channel%03d',str2num(cell_spl{2}) - 96))
                     if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
                         mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
                         cd(sprintf('cell%02d',str2num(cell_spl2{1})))
@@ -122,12 +126,13 @@ if exist(filename)
                     cd ..
                 end
                 cd ..
-            elseif str2num(cell_spl{2}) > 128 && str2num(cell_spl{2}) < 161
+            %elseif  strcmpi(cell_spl{1},'dArea46_')
+                elseif (str2num(cell_spl{2}) > 128 && str2num(cell_spl{2}) < 161) 
                 cd('array05')
-                if ~exist(sprintf('channel%03d',str2num(cell_spl{2})-96))
-                    mkdir(sprintf('channel%03d',str2num(cell_spl{2})-96))
+                if ~exist(sprintf('channel%03d',str2num(cell_spl{2}) - 128))
+                    mkdir(sprintf('channel%03d',str2num(cell_spl{2}) - 128))
                     cell_spl2 = strsplit(cell_spl{3},'s');
-                    cd(sprintf('channel%03d',str2num(cell_spl{2})-96))
+                    cd(sprintf('channel%03d',str2num(cell_spl{2}) - 128))
                     if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
                         mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
                         cd(sprintf('cell%02d',str2num(cell_spl2{1})))
@@ -138,7 +143,7 @@ if exist(filename)
                     cd ..
                 else
                     cell_spl2 = strsplit(cell_spl{3},'s');
-                    cd(sprintf('channel%03d',str2num(cell_spl{2})-96))
+                    cd(sprintf('channel%03d',str2num(cell_spl{2}) - 128))
                     if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
                         mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
                         cd(sprintf('cell%02d',str2num(cell_spl2{1})))
@@ -149,12 +154,13 @@ if exist(filename)
                     cd ..
                 end
                 cd ..
-            elseif str2num(cell_spl{2}) > 160 && str2num(cell_spl{2}) < 193
+            %elseif  strcmpi(cell_spl{1},'SEF_')
+                elseif (str2num(cell_spl{2}) > 160 && str2num(cell_spl{2}) < 193)
                 cd('array06')
-                if ~exist(sprintf('channel%03d',str2num(cell_spl{2})-96))
-                    mkdir(sprintf('channel%03d',str2num(cell_spl{2})-96))
+                if ~exist(sprintf('channel%03d',str2num(cell_spl{2}) - 160))
+                    mkdir(sprintf('channel%03d',str2num(cell_spl{2}) - 160))
                     cell_spl2 = strsplit(cell_spl{3},'s');
-                    cd(sprintf('channel%03d',str2num(cell_spl{2})-96))
+                    cd(sprintf('channel%03d',str2num(cell_spl{2}) - 160))
                     if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
                         mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
                         cd(sprintf('cell%02d',str2num(cell_spl2{1})))
@@ -165,7 +171,7 @@ if exist(filename)
                     cd ..
                 else
                     cell_spl2 = strsplit(cell_spl{3},'s');
-                    cd(sprintf('channel%03d',str2num(cell_spl{2})-96))
+                    cd(sprintf('channel%03d',str2num(cell_spl{2}) - 160))
                     if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
                         mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
                         cd(sprintf('cell%02d',str2num(cell_spl2{1})))
@@ -176,12 +182,13 @@ if exist(filename)
                     cd ..
                 end
                 cd ..
-            elseif str2num(cell_spl{2}) > 192 && str2num(cell_spl{2}) < 225
+%             elseif  strcmpi(cell_spl{1},'vDLPFC_')
+                elseif (str2num(cell_spl{2}) > 192 && str2num(cell_spl{2}) < 225) 
                 cd('array07')
-                if ~exist(sprintf('channel%03d',str2num(cell_spl{2})-96))
-                    mkdir(sprintf('channel%03d',str2num(cell_spl{2})-96))
+                if ~exist(sprintf('channel%03d',str2num(cell_spl{2}) - 192))
+                    mkdir(sprintf('channel%03d',str2num(cell_spl{2}) - 192))
                     cell_spl2 = strsplit(cell_spl{3},'s');
-                    cd(sprintf('channel%03d',str2num(cell_spl{2})-96))
+                    cd(sprintf('channel%03d',str2num(cell_spl{2}) - 192))
                     if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
                         mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
                         cd(sprintf('cell%02d',str2num(cell_spl2{1})))
@@ -192,7 +199,7 @@ if exist(filename)
                     cd ..
                 else
                     cell_spl2 = strsplit(cell_spl{3},'s');
-                    cd(sprintf('channel%03d',str2num(cell_spl{2})-96))
+                    cd(sprintf('channel%03d',str2num(cell_spl{2}) - 192))
                     if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
                         mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
                         cd(sprintf('cell%02d',str2num(cell_spl2{1})))
@@ -205,10 +212,10 @@ if exist(filename)
                 cd ..
             else
                cd('array08')
-               if ~exist(sprintf('channel%03d',str2num(cell_spl{2})-96))
-                   mkdir(sprintf('channel%03d',str2num(cell_spl{2})-96))
+               if ~exist(sprintf('channel%03d',str2num(cell_spl{2}) - 224))
+                   mkdir(sprintf('channel%03d',str2num(cell_spl{2}) - 224))
                    cell_spl2 = strsplit(cell_spl{3},'s');
-                   cd(sprintf('channel%03d',str2num(cell_spl{2})-96))
+                   cd(sprintf('channel%03d',str2num(cell_spl{2}) - 224))
                    if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
                        mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
                        cd(sprintf('cell%02d',str2num(cell_spl2{1})))
@@ -219,7 +226,7 @@ if exist(filename)
                    cd ..
                else
                   cell_spl2 = strsplit(cell_spl{3},'s');
-                   cd(sprintf('channel%03d',str2num(cell_spl{2})-96))
+                   cd(sprintf('channel%03d',str2num(cell_spl{2}) - 224))
                    if ~exist(sprintf('cell%02d',str2num(cell_spl2{1})))
                        mkdir(sprintf('cell%02d',str2num(cell_spl2{1})))
                        cd(sprintf('cell%02d',str2num(cell_spl2{1})))

@@ -26,7 +26,7 @@ Args.DataCheckArgs = {};
 % passed to createObject and createEmptyObject
 Args.classname = 'raster';
 Args.matname = [Args.classname '.mat'];
-Args.matvarname = 'df';
+Args.matvarname = 'rr';
 
 % To decide the method to create or load the object
 command = checkObjCreate('ArgsC',Args,'narginC',nargin,'firstVarargin',varargin);
@@ -58,9 +58,9 @@ session_dir = getDataDirNew('session');
 cwd = pwd;
 cd(session_dir);
 if ~isempty(strmatch('Pancake',strsplit(cwd,'/'))) || ~isempty(strmatch('James',strsplit(cwd,'/')))
-    tr = trialsOld('auto',varargin{:});
+    tr = trialsOld('auto',varargin{:},'redo');
 else
-    tr = trials('auto',varargin{:});
+    tr = trials('auto',varargin{:},'redo');
 end
 cd(cwd);
 
@@ -103,6 +103,7 @@ if ~isempty(tr) && exist('unit.mat')
     data.trialidx = trialidx;
     data.spiketimes = spiketimes;
     data.setIndex = ones(length(trialidx),1);
+    data.trialobj = tr.data.trials;
     data.Args = Args;
     n = nptdata(data.numSets,0,pwd);
     d.data = data;

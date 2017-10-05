@@ -1,4 +1,4 @@
-function [obj, varargout] = trialsOld(varargin)
+function [obj, varargout] = spikecount(varargin)
 %@dirfiles Constructor function for DIRFILES class
 %   OBJ = dirfiles(varargin)
 %
@@ -12,9 +12,11 @@ function [obj, varargout] = trialsOld(varargin)
 %
 %dependencies: 
 
-Args = struct('RedoLevels',0, 'SaveLevels',0, 'Auto',0, 'ArgsOnly',0);
+Args = struct('RedoLevels',0, 'SaveLevels',0, 'Auto',0, 'ArgsOnly',0,'Bins',[],'Trial','','AlignmentEvent','');
 Args.flags = {'Auto','ArgsOnly'};
-% The arguments which can be neglected during arguments checking
+% Specify which arguments should be checked when comparing saved objects
+% to objects that are being asked for. Only arguments that affect the data
+% saved in objects should be listed here.
 Args.DataCheckArgs = {};                            
 
 [Args,modvarargin] = getOptArgs(varargin,Args, ...
@@ -24,9 +26,9 @@ Args.DataCheckArgs = {};
 
 % variable specific to this class. Store in Args so they can be easily
 % passed to createObject and createEmptyObject
-Args.classname = 'trialsOld';
+Args.classname = 'spikecount';
 Args.matname = [Args.classname '.mat'];
-Args.matvarname = 'tr';
+Args.matvarname = 'sp';
 
 % To decide the method to create or load the object
 command = checkObjCreate('ArgsC',Args,'narginC',nargin,'firstVarargin',varargin);
@@ -56,22 +58,31 @@ dlist = nptDir;
 dnum = size(dlist,1);
 
 % check if the right conditions were met to create object
-if(dnum>0)
-    if exist('event_data.mat')
-        trials = loadTrialInfo('event_data.mat');
-        
-    end
+if exist('unit.mat')
 	% this is a valid object
 	% these are fields that are useful for most objects
 	data.numSets = 1;
-	data.trials = trials;
+    data.Args = Args;
+	if exist('raster.mat')
+        r = raster('auto','save','redo');
+        rr = get(r,'TrialType',Args.Trial,'AlignmentEvent',Args.AlignmentEvent,'TimeInterval',[abs(Args.Bins(1)) abs(Args.Bins(end))]);
+    else
+        r = raster('auto','save','redo');
+        rr = get(r,'TrialType',Args.Trial,'AlignmentEvent',Args.AlignmentEvent,'TimeInterval',[abs(Args.Bins(1)) abs(Args.Bins(end))]);
+    end
+    n_trials = unique(rr.data.trialidx);
+    for i = 1:length(n_trials)
+        tmp_spikes = rr.data.spiketimes(find(rr.data.trialidx==n_trials(i)));
+        [spcount(i,:),edges] = histcounts(tmp_spikes,Args.Bins);
+    end
 	% these are object specific fields
 	data.dlist = dlist;
 	% set index to keep track of which data goes with which directory
-	data.setIndex = [0; dnum];
-	
+	data.setIndex = rr.data.setIndex;
+	data.spcount = spcount;
+    data.edges = edges;
 	% create nptdata so we can inherit from it
-    
+    data.trialobj = rr.data.trialobj;
     data.Args = Args;
 	n = nptdata(data.numSets,0,pwd);
 	d.data = data;
@@ -91,7 +102,7 @@ data.setNames = '';
 % these are object specific fields
 data.dlist = [];
 data.setIndex = [];
-data.trials = [];
+
 % create nptdata so we can inherit from it
 data.Args = Args;
 n = nptdata(0,0);

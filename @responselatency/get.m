@@ -10,9 +10,9 @@ function [r,varargout] = get(obj,varargin)
 %   Dependencies:
 
 Args = struct('ObjectLevel',0, 'AnalysisLevel',0,'TrialLevel',0, 'Smoothed',0,...
-							'ReactionTimeDependence',0,'glmfit',0);
+							'ReactionTimeDependence',0,'glmfit',struct);
 Args.flags ={'ObjectLevel','AnalysisLevel','TrialLevel','ReactionTimeDependence',...
-							'glmfit'};
+							};
 Args = getOptArgs(varargin,Args);
 
 % set variables to default
@@ -57,15 +57,23 @@ elseif Args.ReactionTimeDependence
 		pvals(i) = ranksum(scounts(i,lower_idx), scounts(i, upper_idx));
 	end
 	vidx = find(pvals < 0.05);
-	%figure out the boundaries
-	qidx = find(diff(vidx) > 1);
-	%figure out where each region starts
-	stidx = [1;(qidx+1)];
-	%figure out where each region ends
-	eidx = [qidx;length(vidx)];
-	r = obj.data.xi([vidx(stidx) vidx(eidx)]);
-elseif Args.glmfit
-	window = [-0.15, 0.05];
+	if isempty(vidx)
+		r = [];
+	else
+		%figure out the boundaries
+		qidx = find(diff(vidx) > 1);
+		%figure out where each region starts
+		stidx = [1;(qidx+1)];
+		%figure out where each region ends
+		eidx = [qidx;length(vidx)];
+		r = [vidx(stidx) vidx(eidx)];
+	end
+elseif ~isempty(fieldnames(Args.glmfit))
+	if isfield(Args.glmfit, 'window')
+		window = Args.glmfit.window;
+	else
+		window = [-0.15, -0.05];
+	end
 	widx = find((obj.data.xi < window(2))&(obj.data.xi > window(1)));
 	y = sum(obj.data.counts(widx, :),1)';
 	nd = nptdata(obj);
@@ -76,9 +84,14 @@ elseif Args.glmfit
 	et = eyetrials('auto');
 	cd(cwd);
 	tlabel = get(tr, 'TargetLabel');
+	%hack
+	%
 	rtime = get(et, 'ReactionTime');
 	X = [rtime(obj.data.trialidx,:) tlabel(obj.data.trialidx,:)];
-	m = fitglm(X, y, 'interactions', 'CategoricalVars',[2],'Distribution','poisson');
+	xidx = (X(:,2) == 19)|(X(:,2) == 25);
+	m = fitglm(X, y, 'interactions', 'CategoricalVars',[2],'Distribution','poisson',...
+						 'Varnames',{'Reaction_time', 'Target_label','spike_count'},...
+						 'Exclude',xidx);
 	r = m;
 else
 	% if we don't recognize and of the options, pass the call to parent

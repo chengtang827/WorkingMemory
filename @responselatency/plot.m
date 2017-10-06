@@ -56,11 +56,12 @@ else
 		for i = 1:length(pvals)
 			pvals(i) = ranksum(scounts(i,lower_idx), scounts(i, upper_idx));
 		end
-		ml = mean(scounts(:,rtime < mm),2);
+		binsize = mean(diff(obj.data.xi(n,:)));
+		ml = mean(scounts(:,rtime < mm),2)./binsize;
 		sl = std(scounts(:,rtime < mm)')';
 		lowerl = ml - sl;
 		upperl = ml + sl;
-		mu = mean(scounts(:,rtime > mm),2);
+		mu = mean(scounts(:,rtime > mm),2)./binsize;
 		su = std(scounts(:,rtime > mm)')';
 		loweru = mu - su;
 		upperu = mu + su;
@@ -105,8 +106,8 @@ end
 %
 % @dirfiles/PLOT takes 'LabelsOff' as an example
 if(~Args.LabelsOff)
-	xlabel('X Axis')
-	ylabel('Y Axis')
+	xlabel('Time [s]')
+	ylabel('Firing rate [Hz]')
 end
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

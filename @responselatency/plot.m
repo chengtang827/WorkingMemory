@@ -81,7 +81,7 @@ else
 		plot(obj.data.xi(n,1:end-1), mlp,'linewidth',2.0, 'color', l2.Color);
 		plot(obj.data.xi(n,1:end-1), mup,'linewidth',2.0,'color',l1.Color);
 
-		legend([l1,l2], {'Upper','Lower'});
+		legend([l1,l2], {'Long reaction time','Short reaction time'});
 		title(cellname);
 
 	else

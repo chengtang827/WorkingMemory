@@ -67,8 +67,7 @@ elseif Args.ReactionTimeDependence
 elseif Args.glmfit
 	window = [-0.15, 0.05];
 	widx = find((obj.data.xi < window(2))&(obj.data.xi > window(1)));
-	X = get(obj, 'Smoothed', 20);
-	y = sum(X(widx, :),1)';
+	y = sum(obj.data.counts(widx, :),1)';
 	nd = nptdata(obj);
 	session_dir = getDataOrder('session', 'DirString', nd.SessionDirs{1});
 	cwd = pwd;

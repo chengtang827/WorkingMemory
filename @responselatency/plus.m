@@ -37,11 +37,22 @@ else
 		r = p;
 		% useful fields for most objects
 		r.data.numSets = p.data.numSets + q.data.numSets;
-		r.data.setIndex = [p.data.setIndex q.data.setIndex + p.data.setIndex(end)];
+
 
 		% object specific fields
 		r.data.dlist = [p.data.dlist; q.data.dlist];
-		r.data.trials = [p.data.trials q.data.trials];
+		if ~isempty(p.data.setIndex)
+			toffset = p.data.setIndex(end);
+		else
+			toffset = 0;
+		end
+		r.data.setIndex = [p.data.setIndex q.data.setIndex + toffset];
+    r.data.xi = [p.data.xi; q.data.xi];
+    r.data.density = [p.data.density q.data.density];
+    r.data.bandwith = [p.data.bandwidth; q.data.bandwidth];
+		r.data.counts = [p.data.counts q.data.counts];
+		r.data.trialidx = [p.data.trialidx; q.data.trialidx];
+
 		% add nptdata objects as well
 		r.nptdata = plus(p.nptdata,q.nptdata);
 	end

@@ -15,12 +15,12 @@ function [obj, varargout] = raster(varargin)
 Args = struct('RedoLevels',0, 'SaveLevels',0, 'Auto',0, 'ArgsOnly',0);
 Args.flags = {'Auto','ArgsOnly'};
 % The arguments which can be neglected during arguments checking
-Args.UnimportantArgs = {'RedoLevels','SaveLevels'};
+Args.DataCheckArgs = {};
 
 [Args,modvarargin] = getOptArgs(varargin,Args, ...
-	'subtract',{'RedoLevels','SaveLevels'}, ...
-	'shortcuts',{'redo',{'RedoLevels',1}; 'save',{'SaveLevels',1}}, ...
-	'remove',{'Auto'});
+    'subtract',{'RedoLevels','SaveLevels'}, ...
+    'shortcuts',{'redo',{'RedoLevels',1}; 'save',{'SaveLevels',1}}, ...
+    'remove',{'Auto'});
 
 % variable specific to this class. Store in Args so they can be easily
 % passed to createObject and createEmptyObject
@@ -57,48 +57,64 @@ dnum = size(dlist,1);
 session_dir = getDataDirNew('session');
 cwd = pwd;
 cd(session_dir);
-tr = trials('auto',varargin{:});
-cd(cwd);
-% check if the right conditions were met to create object
-if ~isempty(tr) && exist('unit.mat', 'file')
-	% this is a valid object
-	% these are fields that are useful for most objects
-	data.numSets = 1;
-  data.Args = Args;
-
-	% these are object specific fields
-	data.dlist = dlist;
-	% set index to keep track of which data goes with which directory
-
-	% create nptdata so we can inherit from it
-	trialidx = [];
-	spiketimes = [];
-	load unit.mat
-	timestamps = timestamps./sampling_rate; %convert to seconds
-	for t=1:length(tr.data.trials)
-		t0 = tr.data.trials(t).start;
-		if isempty(t0)
-			continue %invalid trials
-		end
-		t1 = t0 + tr.data.trials(t).end;
-		if isempty(t1)
-			continue %invalid trials
-		end
-		tidx = find((timestamps > t0)&(timestamps < t1));
-		spiketimes = [spiketimes;timestamps(tidx)-t0];
-		trialidx = [trialidx;repmat(t, length(tidx),1)];
-	end
-	data.trialidx = trialidx;
-	data.spiketimes = spiketimes;
-	data.setIndex = ones(length(trialidx),1);
-  data.Args = Args;
-	n = nptdata(data.numSets,0,pwd);
-	d.data = data;
-	obj = class(d,Args.classname,n);
-	saveObject(obj,'ArgsC',Args);
+if ~isempty(strmatch('Pancake',strsplit(cwd,'/'))) || ~isempty(strmatch('James',strsplit(cwd,'/')))
+    tr = trialsOld('auto',varargin{:});
 else
-	% create empty object
-	obj = createEmptyObject(Args);
+    tr = trials('auto',varargin{:});
+end
+cd(cwd);
+
+
+
+% check if the right conditions were met to create object
+if ~isempty(tr) && exist('unit.mat')
+    % this is a valid object
+    % these are fields that are useful for most objects
+    data.numSets = 1;
+    data.Args = Args;
+    
+    % these are object specific fields
+    data.dlist = dlist;
+    % set index to keep track of which data goes with which directory
+    
+    % create nptdata so we can inherit from it
+    trialidx = [];
+    spiketimes = [];
+    load unit.mat
+    sampling_rate = 1000;
+    timestamps = timestamps./sampling_rate; %convert to seconds
+    for t=1:length(tr.data.trials)
+        t0 = tr.data.trials(t).start;
+        if isempty(t0)
+            continue %invalid trials
+        end
+        if ~isempty(strmatch('Pancake',strsplit(cwd,'/'))) || ~isempty(strmatch('James',strsplit(cwd,'/')))
+            t1 = tr.data.trials(t).end;
+        else
+            t1 = t0 + tr.data.trials(t).end;
+        end
+        if isempty(t1)
+            continue %invalid trials
+        end
+        tidx = find((timestamps > t0)&(timestamps < t1));
+        spiketimes = [spiketimes;timestamps(tidx)-t0];
+        trialidx = [trialidx;repmat(t, length(tidx),1)];
+    end
+    data.trialidx = trialidx;
+    data.spiketimes = spiketimes;
+    data.setIndex = ones(length(trialidx),1);
+    data.Args = Args;
+    n = nptdata(data.numSets,0,pwd);
+    d.data = data;
+    obj = class(d,Args.classname,n);
+    
+    saveObject(obj,'ArgsC',Args);
+    
+    
+    
+else
+    % create empty object
+    obj = createEmptyObject(Args);
 end
 
 function obj = createEmptyObject(Args)

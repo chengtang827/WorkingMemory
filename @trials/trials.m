@@ -35,7 +35,7 @@ function [obj, varargout] = trials(varargin)
 Args = struct('RedoLevels',0, 'SaveLevels',0, 'Auto',0, 'ArgsOnly',0);
 Args.flags = {'Auto','ArgsOnly'};
 % The arguments which can be neglected during arguments checking
-Args.UnimportantArgs = {'RedoLevels','SaveLevels'};
+Args.DataCheckArgs = {};
 
 [Args,modvarargin] = getOptArgs(varargin,Args, ...
     'subtract',{'RedoLevels','SaveLevels'}, ...
@@ -135,7 +135,7 @@ if ~isempty(dlist)
             d.data = data;
             obj = class(d,Args.classname,n);
             saveObject(obj,'ArgsC',Args);
-    else
+    elseif exist('../event_markers.txt')
         cd ..
         if exist('event_markers.txt')
             A = importdata('event_markers.txt');
@@ -160,6 +160,8 @@ if ~isempty(dlist)
         else
             obj = createEmptyObject(Args);
         end
+    else
+         obj = createEmptyObject(Args);
     end
 else
     % create empty object

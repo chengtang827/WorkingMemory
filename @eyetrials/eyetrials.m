@@ -12,10 +12,11 @@ function [obj, varargout] = eyetrials(varargin)
 %
 %dependencies:
 
-Args = struct('RedoLevels',0, 'SaveLevels',0, 'Auto',0, 'ArgsOnly',0);
+Args = struct('RedoLevels',0, 'SaveLevels',0, 'Auto',0, 'ArgsOnly',0,...
+              'triggers', struct,'edfdata',[]);
 Args.flags = {'Auto','ArgsOnly'};
 % The arguments which can be neglected during arguments checking
-Args.UnimportantArgs = {'RedoLevels','SaveLevels'};
+Args.DataCheckArgs = {};
 
 [Args,modvarargin] = getOptArgs(varargin,Args, ...
     'subtract',{'RedoLevels','SaveLevels'}, ...
@@ -62,34 +63,66 @@ dnum = length(dlist);
 
 % check if the right conditions were met to create object
 if(dnum>0)
-    % this is a valid object
-    % these are fields that are useful for most objects
-    data.Args = Args;
-    data.numSets = 1;
-    % these are object specific fields
-    data.dlist = dlist;
-    [pathstr,name,ext] = fileparts(dlist(1).name);
-    if strcmp(ext,'.mat')
-      load(dlist(1).name);
+    if ~exist(dlist(1).name,'file')
+      obj = createEmptyObject(Args);
     else
-      edfdata = edfmex(dlist(1).name);
+      % this is a valid object
+      % these are fields that are useful for most objects
+      data.Args = Args;
+      data.numSets = 1;
+      % these are object specific fields
+      data.dlist = dlist;
+      [pathstr,name,ext] = fileparts(dlist(1).name);
+      if strcmp(ext,'.mat')
+        load(dlist(1).name);
+      else
+        edfdata = edfmex(dlist(1).name);
+        if Args.SaveLevels > 0
+          save('edfdata.mat','edfdata', '-v7.3');
+        end
+      end
+      if ~isempty(fieldnames(Args.triggers))
+        triggers = Args.triggers;
+      else
+        triggers = struct('trial_start','00000010',...
+                  'trial_end','00100000');
+      end
+      trialdata = parseEDFData(eyetrials, edfdata, triggers);
+      if isfield(trialdata(1),'trials')
+        %multiple sessions in one structure
+        data.setIndex = [];
+        data.trials = struct;
+        data.numSets = length(trialdata);
+        k = 1;
+        for i = 1:length(trialdata) %iterate over sessions
+          for j = 1:length(trialdata(i).trials)
+            ff = fieldnames(trialdata(i).trials(j));
+            if ~isempty(ff)
+              for fi = 1:length(ff)
+                data.trials(k).(ff{fi}) = trialdata(i).trials(j).(ff{fi});
+              end
+              data.setIndex(k) = i;
+              k = k + 1;
+            end
+          end
+        end
+        ntrials = k;
+      else
+        data.trials = trialdata.trials;
+        ntrials = length(data.trials);
+        data.setIndex = ones(ntrials,1);
+      end
+      %get the screen size
+      screen_size_str = split(edfdata.FEVENT(1).message);
+      data.screen_size = [str2double(screen_size_str{end-1}) str2double(screen_size_str{end})];
+      % create nptdata so we can inherit from it
+      data.Args = Args;
+      % set index to keep track of which data goes with which directory
+      n = nptdata(data.numSets,0,pwd);
+      d.data = data;
+      obj = class(d,Args.classname,n);
+      saveObject(obj,'ArgsC', Args);
     end
-    triggers = {{'trial_start' '00000001'},...
-                {'trial_end' '00100000'}};
-    trialdata = parseEDFData(eyetrials, edfdata, triggers);
-    data.trials = trialdata.trials;
-    %get the screen size
-    screen_size_str = split(edfdata.FEVENT(1).message);
-    data.screen_size = [str2double(screen_size_str{end-1}) str2double(screen_size_str{end})];
-    ntrials = length(data.trials);
-    % create nptdata so we can inherit from it
-    data.Args = Args;
-    % set index to keep track of which data goes with which directory
-    data.setIndex = ones(ntrials,1);
-    n = nptdata(data.numSets,0,pwd);
-    d.data = data;
-    obj = class(d,Args.classname,n);
-    saveObject(obj,'ArgsC', Args);
 else
     % create empty object
     obj = createEmptyObject(Args);

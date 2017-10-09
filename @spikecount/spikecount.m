@@ -83,6 +83,7 @@ if exist('unit.mat')
     data.edges = edges;
 	% create nptdata so we can inherit from it
     data.trialobj = rr.data.trialobj;
+    data.trialsessidx = ones(length(data.trialobj),1);
     data.Args = Args;
 	n = nptdata(data.numSets,0,pwd);
 	d.data = data;

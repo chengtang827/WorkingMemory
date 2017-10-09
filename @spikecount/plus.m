@@ -37,13 +37,35 @@ else
 		r = p;
 		% useful fields for most objects
 		r.data.numSets = p.data.numSets + q.data.numSets;
+        
 
 		
 		% object specific fields
 		r.data.dlist = [p.data.dlist; q.data.dlist];
-		r.data.setIndex = [p.data.setIndex; (p.data.setIndex(end) ...
-			+ q.data.setIndex(2:end))];
-			
+		if ~isempty(p.data.setIndex)
+			toffset = p.data.setIndex(end);
+		else
+			toffset = 0;
+		end
+		r.data.setIndex = [p.data.setIndex; q.data.setIndex + toffset];
+        r.data.edges = p.data.edges;
+        p_trial_tab = tabulate(p.data.trialsessidx);
+        if (size(p_trial_tab,1)==1 && p_trial_tab(1,2)==length(q.data.trialobj)) || (p_trial_tab(size(p_trial_tab,1),2)==length(q.data.trialobj))
+            r.data.trialobj = p.data.trialobj;
+            r.data.trialsessidx = p.data.trialsessidx;
+        else
+            r.data.trialobj = [p.data.trialobj; q.data.trialobj];
+            r.data.trialsessidx = [p.data.trialsessidx; q.data.trialsessidx+1];
+        end
+        if (length(unique(r.data.trialsessidx)) == 1) || (p_trial_tab(size(p_trial_tab,1),2)==length(q.data.trialobj) && p_trial_tab(size(p_trial_tab,1),2)==max(p_trial_tab(:,2)))
+            r.data.spcount = cat(3,p.data.spcount,q.data.spcount);
+        elseif p_trial_tab(size(p_trial_tab,1),2)~=length(q.data.trialobj) && length(q.data.trialobj) > max(p_trial_tab(:,2))
+            p.data.spcount = padarray(p.data.spcount,[length(q.data.trialobj) - size(p.data.spcount,1) 0 0],'post');
+            r.data.spcount = cat(3,p.data.spcount,q.data.spcount);
+        elseif p_trial_tab(size(p_trial_tab,1),2)~=length(q.data.trialobj) && length(q.data.trialobj) < max(p_trial_tab(:,2))
+            q.data.spcount = padarray(q.data.spcount,[size(p.data.spcount,1) - size(q.data.spcount,1) 0 0],'post');
+            r.data.spcount = cat(3,p.data.spcount,q.data.spcount);
+        end
 		% add nptdata objects as well
 		r.nptdata = plus(p.nptdata,q.nptdata);
 	end

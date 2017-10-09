@@ -5,7 +5,7 @@ function [obj, varargout] = plot(obj,varargin)
 
 Args = struct('LabelsOff',0,'GroupPlots',1,'GroupPlotIndex',1,'Color','b', ...
 		  'TrialLevel', 0, 'ReturnVars',{''}, 'ArgsOnly',0,'ReactionTime', 0,...
-			'WindowSize',10);
+			'WindowSize',10,'EyetrialsObj',[]);
 Args.flags = {'LabelsOff','ArgsOnly','TrialLevel','ReactionTime'};
 [Args,varargin2] = getOptArgs(varargin,Args);
 
@@ -42,7 +42,8 @@ else
 	cellname = getDataOrder('ShortName','DirString',celldir);
 	if Args.ReactionTime
 		q = get(obj, 'ReactionTimeDependence',struct('WindowSize',Args.WindowSize,...
-																									'SetIndex',tidx));
+																									'SetIndex',tidx,...
+																									'EyetrialsObj', Args.EyetrialsObj));
 		rtime = q.rtime;
 
 		mm = median(rtime);

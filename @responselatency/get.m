@@ -32,13 +32,21 @@ elseif Args.Smoothed > 0
 	end
 	r = scounts;
 elseif ~isempty(fieldnames(Args.ReactionTimeDependence))
-	nd = nptdata(obj);
-	celldir = nd.SessionDirs{1};
-	session_dir = getDataOrder('session','DirString',celldir);
-	cwd = pwd;
-	cd(session_dir)
-	et = eyetrials('auto');
-	cd(cwd)
+	et = [];
+	if isfield(Args.ReactionTimeDependence,'EyetrialsObj')
+		if ~isempty(Args.ReactionTimeDependence.EyetrialsObj)
+			et = Args.ReactionTimeDependence.EyetrialsObj;
+		end
+	end
+	if isempty(et)
+		nd = nptdata(obj);
+		celldir = nd.SessionDirs{1};
+		session_dir = getDataOrder('session','DirString',celldir);
+		cwd = pwd;
+		cd(session_dir)
+		et = eyetrials('auto');
+		cd(cwd)
+	end
 	rtime = get(et, 'ReactionTime');
 	tidx = 1:length(obj.data.trialidx);
 	if isfield(Args.ReactionTimeDependence, 'SetIndex')

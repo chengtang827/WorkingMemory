@@ -9,8 +9,8 @@ function [r,varargout] = get(obj,varargin)
 %
 %   Dependencies:
 
-Args = struct('ObjectLevel',0, 'AnalysisLevel',0,'EventTiming','');
-Args.flags ={'ObjectLevel','AnalysisLevel'};
+Args = struct('ObjectLevel',0, 'AnalysisLevel',0,'EventTiming','','TargetOnset',0);
+Args.flags ={'ObjectLevel','AnalysisLevel','TargetOnset'};
 Args = getOptArgs(varargin,Args);
 
 % set variables to default
@@ -41,6 +41,8 @@ elseif ~isempty(Args.EventTiming)
       end
   end
   r = ts;
+elseif Args.TargetOnset
+    r = get(obj, 'EventTiming','target');
 else
 	% if we don't recognize and of the options, pass the call to parent
 	% in case it is to get number of events, which has to go all the way

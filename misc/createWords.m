@@ -14,7 +14,7 @@ function [words,timestamps] = createWords(event_ids, event_ts)
         if sorted_ts(j) - sorted_ts(j-1) < 1e-4
           w(sorted_ids(j)) = 1;
         else
-          words = [words;w];
+          words = [words;reverse(w)];
           w = zeros(1,nn);
           w(sorted_ids(j)) = 1;
           timestamps = [timestamps;sorted_ts(j-1)];

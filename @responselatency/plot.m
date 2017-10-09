@@ -41,7 +41,8 @@ else
 	celldir = nd.SessionDirs{n};
 	cellname = getDataOrder('ShortName','DirString',celldir);
 	if Args.ReactionTime
-		q = get(obj, 'ReactionTimeDependence',struct('WindowSize',Args.WindowSize));
+		q = get(obj, 'ReactionTimeDependence',struct('WindowSize',Args.WindowSize,...
+																									'SetIndex',tidx));
 		rtime = q.rtime;
 
 		mm = median(rtime);

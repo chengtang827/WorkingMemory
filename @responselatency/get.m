@@ -40,8 +40,14 @@ elseif ~isempty(fieldnames(Args.ReactionTimeDependence))
 	et = eyetrials('auto');
 	cd(cwd)
 	rtime = get(et, 'ReactionTime');
-	gidx = intersect(find(~isnan(rtime)),obj.data.trialidx);
-	qidx = find(ismember(obj.data.trialidx, gidx));
+	tidx = 1:length(obj.data.trialidx);
+	if isfield(Args.ReactionTimeDependence, 'SetIndex')
+		if ~isempty(Args.ReactionTimeDependence.SetIndex)
+			tidx = Args.ReactionTimeDependence.SetIndex;
+		end
+	end
+	gidx = intersect(find(~isnan(rtime)),obj.data.trialidx(tidx));
+	qidx = find(ismember(obj.data.trialidx(tidx), gidx));
 	scounts = zeros(size(obj.data.counts,1), length(gidx));
 	rtime = rtime(gidx);
 	w = 20;
@@ -51,7 +57,7 @@ elseif ~isempty(fieldnames(Args.ReactionTimeDependence))
 		end
 	end
 	for i = 1:length(gidx)
-		scounts(:,i) = smooth(obj.data.counts(:,qidx(i)),w);
+		scounts(:,i) = smooth(obj.data.counts(:,tidx(qidx(i))),w);
 	end
 	pvals = zeros(size(scounts,1),1);
 	mm = median(rtime);
@@ -62,7 +68,8 @@ elseif ~isempty(fieldnames(Args.ReactionTimeDependence))
 	end
 	vidx = find(pvals < 0.05);
 	if isempty(vidx)
-		r = [];
+		r = struct('sig_window',[],...
+							 'rtime', rtime, 'scounts',scounts);
 	else
 		%figure out the boundaries
 		qidx = find(diff(vidx) > 1);

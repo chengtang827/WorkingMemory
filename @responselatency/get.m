@@ -10,9 +10,8 @@ function [r,varargout] = get(obj,varargin)
 %   Dependencies:
 
 Args = struct('ObjectLevel',0, 'AnalysisLevel',0,'TrialLevel',0, 'Smoothed',0,...
-							'ReactionTimeDependence',0,'glmfit',struct);
-Args.flags ={'ObjectLevel','AnalysisLevel','TrialLevel','ReactionTimeDependence',...
-							};
+							'ReactionTimeDependence',struct,'glmfit',struct);
+Args.flags ={'ObjectLevel','AnalysisLevel','TrialLevel'};
 Args = getOptArgs(varargin,Args);
 
 % set variables to default
@@ -32,7 +31,7 @@ elseif Args.Smoothed > 0
 		scounts(:,i) = smooth(obj.data.counts(:,i),Args.Smoothed);
 	end
 	r = scounts;
-elseif Args.ReactionTimeDependence
+elseif ~isempty(fieldnames(Args.ReactionTimeDependence))
 	nd = nptdata(obj);
 	celldir = nd.SessionDirs{1};
 	session_dir = getDataOrder('session','DirString',celldir);
@@ -45,7 +44,12 @@ elseif Args.ReactionTimeDependence
 	qidx = find(ismember(obj.data.trialidx, gidx));
 	scounts = zeros(size(obj.data.counts,1), length(gidx));
 	rtime = rtime(gidx);
-	w = 20;  % TODO: make this an argument
+	w = 20;
+	if isfield(Args.ReactionTimeDependence,'WindowSize')
+		if ~isempty(Args.ReactionTimeDependence.WindowSize)
+			w = Args.ReactionTimeDependence.WindowSize;
+		end
+	end
 	for i = 1:length(gidx)
 		scounts(:,i) = smooth(obj.data.counts(:,qidx(i)),w);
 	end
@@ -66,7 +70,8 @@ elseif Args.ReactionTimeDependence
 		stidx = [1;(qidx+1)];
 		%figure out where each region ends
 		eidx = [qidx;length(vidx)];
-		r = [vidx(stidx) vidx(eidx)];
+		r = struct('sig_window',[vidx(stidx) vidx(eidx)],...
+							 'rtime', rtime, 'scounts',scounts);
 	end
 elseif ~isempty(fieldnames(Args.glmfit))
 	if isfield(Args.glmfit, 'window')

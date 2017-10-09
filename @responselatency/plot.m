@@ -4,9 +4,9 @@ function [obj, varargout] = plot(obj,varargin)
 %   response.
 
 Args = struct('LabelsOff',0,'GroupPlots',1,'GroupPlotIndex',1,'Color','b', ...
-		  'TrialLevel', 0, 'ReturnVars',{''}, 'ArgsOnly',0,'ReactionTime', [],...
+		  'TrialLevel', 0, 'ReturnVars',{''}, 'ArgsOnly',0,'ReactionTime', 0,...
 			'WindowSize',10);
-Args.flags = {'LabelsOff','ArgsOnly','TrialLevel'};
+Args.flags = {'LabelsOff','ArgsOnly','TrialLevel','ReactionTime'};
 [Args,varargin2] = getOptArgs(varargin,Args);
 
 % if user select 'ArgsOnly', return only Args structure for an empty object
@@ -40,44 +40,32 @@ else
 	nd = nptdata(obj);
 	celldir = nd.SessionDirs{n};
 	cellname = getDataOrder('ShortName','DirString',celldir);
-	if ~isempty(Args.ReactionTime)
-		gidx = intersect(find(~isnan(Args.ReactionTime)),obj.data.trialidx(tidx));
-		qidx = find(ismember(obj.data.trialidx(tidx), gidx));
-		scounts = zeros(size(obj.data.counts,1), length(gidx));
-		rtime = Args.ReactionTime(gidx);
-		w = Args.WindowSize;
-		for i = 1:length(gidx)
-			scounts(:,i) = smooth(obj.data.counts(:,tidx(qidx(i))),w);
-		end
-		pvals = zeros(size(scounts,1),1);
+	if Args.ReactionTime
+		q = get(obj, 'ReactionTimeDependence',struct('WindowSize',Args.WindowSize));
+		rtime = q.rtime;
+
 		mm = median(rtime);
+		scounts = q.scounts;
+		regions = q.sig_window;
+
 		upper_idx = find(rtime > mm);
 		lower_idx = find(rtime < mm);
-		for i = 1:length(pvals)
-			pvals(i) = ranksum(scounts(i,lower_idx), scounts(i, upper_idx));
-		end
 		binsize = mean(diff(obj.data.xi(n,:)));
-		ml = mean(scounts(:,rtime < mm),2)./binsize;
-		sl = std(scounts(:,rtime < mm)')';
-		lowerl = ml - sl;
-		upperl = ml + sl;
-		mu = mean(scounts(:,rtime > mm),2)./binsize;
-		su = std(scounts(:,rtime > mm)')';
-		loweru = mu - su;
-		upperu = mu + su;
+		ml = mean(scounts(:,lower_idx),2)./binsize;
+		mu = mean(scounts(:,upper_idx),2)./binsize;
 		cla
-    %patch('XData',[obj.data.xi(n,1:end-1) obj.data.xi(n,end-1:-1:1)],'YData',[lowerl' upperl(end:-1:1)'],...
-    %         'FaceColor',[0.3, 0.1, 0.5]);
-    %patch('XData',[obj.data.xi(n,1:end-1) obj.data.xi(n,end-1:-1:1)],'YData',[loweru' upperu(end:-1:1)'],...
-    %         'FaceColor',[0.3, 0.1, 0.5]);
+
 		l1 = plot(obj.data.xi(n,1:end-1), mu);
 		hold on
 		l2 = plot(obj.data.xi(n,1:end-1), ml);
 
-		mlp = ml;
-		mup = mu;
-		mlp(pvals > 0.05) = nan;
-		mup(pvals > 0.05) = nan;
+		mlp = nan(size(ml));
+		mup = nan(size(mu));
+		for j = 1:size(regions,1)
+			idx = regions(j,1):regions(j,2);
+			mlp(idx) = ml(idx);
+			mup(idx) = mu(idx);
+		end
 		plot(obj.data.xi(n,1:end-1), mlp,'linewidth',2.0, 'color', l2.Color);
 		plot(obj.data.xi(n,1:end-1), mup,'linewidth',2.0,'color',l1.Color);
 

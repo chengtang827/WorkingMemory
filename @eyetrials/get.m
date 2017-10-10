@@ -61,7 +61,7 @@ elseif ~isempty(Args.Event)
           end
           response_saccade(t) = qq;
         else
-          i = i;
+          i = i-1;
           ts(t) = q(i).onset;
           response_saccade(t) = q(i);
         end %if i

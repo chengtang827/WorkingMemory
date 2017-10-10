@@ -70,7 +70,8 @@ if exist(filename)
                     cd ..
                 end
                 cd ..
-            elseif  strcmpi(cell_spl{1},'vArea46_')
+                elseif (str2num(cell_spl{2}) > 64 && str2num(cell_spl{2}) < 97) 
+                    %strcmpi(cell_spl{1},'vArea46_')
                 %(str2num(cell_spl{2}) > 64 && str2num(cell_spl{2}) < 97) ||
                 cd('array03')
                 if ~exist(sprintf('channel%03d',str2num(cell_spl{2}) - 64))

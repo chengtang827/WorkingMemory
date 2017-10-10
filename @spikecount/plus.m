@@ -54,8 +54,8 @@ else
             r.data.trialobj = p.data.trialobj;
             r.data.trialsessidx = p.data.trialsessidx;
         else
-            r.data.trialobj = [p.data.trialobj; q.data.trialobj];
-            r.data.trialsessidx = [p.data.trialsessidx; q.data.trialsessidx+1];
+            r.data.trialobj = [p.data.trialobj q.data.trialobj];
+            r.data.trialsessidx = [p.data.trialsessidx; q.data.trialsessidx+p.data.trialsessidx(end)];
         end
         if (length(unique(r.data.trialsessidx)) == 1) || (p_trial_tab(size(p_trial_tab,1),2)==length(q.data.trialobj) && p_trial_tab(size(p_trial_tab,1),2)==max(p_trial_tab(:,2)))
             r.data.spcount = cat(3,p.data.spcount,q.data.spcount);

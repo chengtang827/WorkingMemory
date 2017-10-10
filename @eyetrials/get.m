@@ -75,6 +75,12 @@ elseif ~isempty(Args.Event)
     r = response_saccade;
   end % if strcmpi(Args.Event)
 elseif ~isempty(Args.EventTiming)
+  %allow parsing of e.g. target.onset
+  ss = split(Args.EventTiming,'.');
+  Args.EventTiming = ss{1};
+  if length(ss) == 2
+    reference = ss{2};
+  end
   ts = nan(length(obj.data.trials),1);
   if isfield(obj.data.trials(1),Args.EventTiming)
     if strcmpi(Args.EventTiming,'saccade')
@@ -88,7 +94,7 @@ elseif ~isempty(Args.EventTiming)
     elseif isstruct(obj.data.trials(1).(Args.EventTiming))
         for t = 1:length(obj.data.trials)
           if ~isempty(obj.data.trials(t).(Args.EventTiming))
-            ts(t) = obj.data.trials(t).(Args.EventTiming).onset;
+            ts(t) = obj.data.trials(t).(Args.EventTiming).(reference);
           end
         end
     else

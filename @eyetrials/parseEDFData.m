@@ -53,6 +53,11 @@ function sessions  = parseEDFData(obj,edfdata,triggers)
     else
       target_prefix = '101';
     end
+    if isfield(triggers, 'target_off_prefix')
+      target_off_prefix = trigger.target_off_prefix;
+    else
+      target_off_prefix = '100';
+    end
     if isfield(triggers, 'distractor_prefix')
       distractor_prefix = triggers.distractor_prefix;
     else
@@ -89,12 +94,15 @@ function sessions  = parseEDFData(obj,edfdata,triggers)
                       px = bin2dec(m(8:-1:3));
                       py = bin2dec(m(end:-1:9));
                   end
-                  sessions(sessionnr).trials(trialnr).target = struct('row', py, 'column', px, 'onset', edfdata.FEVENT(nextevent).sttime);
-
-              elseif strcmp(m(1:3), distractor_prefix)  %distractor
-                  if length(m) == 8
-                      px = bin2dec(m(5:-1:3));
-                      py = bin2dec(m(8:-1:6));
+                  sessions(sessionnr).trials(trialnr).target = struct('row', py, 'column',...
+                                                                    px, 'onset', edfdata.FEVENT(nextevent).sttime,...
+                                                                      'offset', nan);
+              elseif strcmp(m(1:3), target_off_prefix)
+                sessions(sessionnr).trials(trialnr).target.offset = edfdata.FEVENT(nextevent).sttime;
+            elseif strcmp(m(1:3), distractor_prefix)  %distractor
+                if length(m) == 8
+                    px = bin2dec(m(5:-1:3));
+                    py = bin2dec(m(8:-1:6));
                   elseif length(m) == 14
                       px = bin2dec(m(8:-1:3));
                       py = bin2dec(m(end:-1:9));
@@ -122,9 +130,10 @@ function sessions  = parseEDFData(obj,edfdata,triggers)
                     if ~isfield(sessions(sessionnr).trials(trialnr),required_fields{fi})
                       if (strcmpi(required_fields{fi},'distractor') ||...
                           strcmpi(required_fields{fi},'target'))
-                        sessions(sessionnr).trials(trialnr).(required_fields{fi}) = struct('row', 0, 'column',0, 'onset', nan);
+                          sessions(sessionnr).trials(trialnr).(required_fields{fi}) = struct('row', 0, 'column',0, 'onset',nan,...
+                                                                                          'offset', nan);
                       else
-                        sessions(sessionnr).trials(trialnr).(required_fields{fi}) = nan;
+                          sessions(sessionnr).trials(trialnr).(required_fields{fi}) = nan;
                       end
                     end
                   end
